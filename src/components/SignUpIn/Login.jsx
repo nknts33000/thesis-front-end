@@ -1,21 +1,9 @@
 // Login.js
 import React, { useState } from 'react';
 import {Container, Form, Button, Row, Col, Modal} from 'react-bootstrap';
+import {useNavigate} from "react-router-dom";
 
-
-// export const getAuthToken = () => {
-//     return window.localStorage.getItem('auth_token');
-// };
-//
-// export const setAuthHeader = (token) => {
-//     if (token !== null) {
-//         window.localStorage.setItem("auth_token", token);
-//     } else {
-//         window.localStorage.removeItem("auth_token");
-//     }
-// };
-
-function Login() {
+function Login({ setIsAuthenticated }) {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [show, setShow] = useState(false);
@@ -28,48 +16,9 @@ function Login() {
 
     };
     const userforlogin={email,password}
+    const navigate=useNavigate();
 
     const handleModalClose = () => setShow(false);
-
-    // const performlogin= async ()=>
-    // {
-    //     await fetch('http://localhost:8080/login', {
-    //         method: 'POST',
-    //         headers: {
-    //             'Content-Type': 'application/json',
-    //
-    //         },
-    //         body: JSON.stringify(userforlogin)
-    //
-    //     })
-    //         .then(
-    //             (res) => {
-    //                 if(res.status ===200){
-    //                     const user =res.json();
-    //                     const token=user.token;
-    //                     console.log("token: " +token)
-    //                     localStorage.setItem('auth_token', token);
-    //                     handleModalShow(token,"Token is:")
-    //                 }
-    //                 else{
-    //                     handleModalShow("Your email or password is wrong.","Wrong credentials")
-    //                 }
-    //
-    //             }
-    //
-    //         )
-    //         .catch(err =>
-    //             {
-    //                 handleModalShow(err,"An error has occurred.")
-    //             }
-    //         );
-    //     //setAuthHeader(user.token);
-    //
-    //
-    //
-    //
-    // }
-
 
     const performlogin = async () => {
         try {
@@ -90,7 +39,12 @@ function Login() {
                 .then((data) => {
                     const token = data.token;
                     localStorage.setItem('auth_token', token);
-                    handleModalShow("", "Successful login");
+                    localStorage.setItem('user_id',data.id);
+                    localStorage.setItem('user', JSON.stringify(data.user)); // Storing user object
+                    console.log(data);
+                    setIsAuthenticated(true);
+                    navigate(`/user/${data.id}`);
+
                 })
                 .catch((err) => {
                     handleModalShow(err.message, "An error has occurred.");
@@ -110,7 +64,7 @@ function Login() {
         <Container>
             <Row className="justify-content-md-center mt-5">
                 <Col md={6}>
-                    <h2 className="mb-4">Register</h2>
+                    <h2 className="mb-4">Sign In</h2>
                     <Form onSubmit={handleSubmit}>
                         <Form.Group controlId="emailid">
                             <Form.Label>Email address</Form.Label>
@@ -127,7 +81,7 @@ function Login() {
                                           }/>
                         </Form.Group>
                         <Button variant="primary" type="submit" >
-                            Register
+                            Sign In
                         </Button>
                     </Form>
                 </Col>
