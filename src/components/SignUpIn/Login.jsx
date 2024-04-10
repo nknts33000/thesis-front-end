@@ -44,7 +44,7 @@ function Login({ setIsAuthenticated }) {
                     //onsole.log(data);
                     setIsAuthenticated(true);
                     navigate(`/user/${data.id}`);
-
+//
                 })
                 .catch((err) => {
                     handleModalShow(err.message, "An error has occurred.");
