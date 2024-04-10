@@ -4,16 +4,29 @@ import { useParams } from "react-router-dom";
 
 function User() {
     const [showModal, setShowModal] = useState(false);
-    const [postContent, setPostContent] = useState('');
+    const [content, setContent] = useState('');
     const { id } = useParams();
 
     const handleShowModal = () => setShowModal(true);
     const handleCloseModal = () => setShowModal(false);
 
-    const handlePostSubmit = () => {
-        // Handle the submission of the post content here (e.g., send it to the server)
-        console.log('Submitted post:', postContent);
-        // After submitting, close the modal
+    const handlePostSubmit = async () => {
+        const token =localStorage.getItem('auth_token')
+        console.log(localStorage.getItem('auth_token'));
+        const headers={
+            'Content-type':'application/json',
+            'Authorization':`Bearer ${token}`
+        }
+
+        const body = {content,token}
+        const url='http://localhost:8080/user/post';
+        await fetch(url, {
+            method:'POST',
+            headers: headers,
+            body: JSON.stringify(body)
+        }).catch((err) =>{
+            console.log(err);
+        })
         handleCloseModal();
     };
 
@@ -34,8 +47,8 @@ function User() {
                             <Form.Control
                                 as="textarea"
                                 rows={3}
-                                value={postContent}
-                                onChange={(e) => setPostContent(e.target.value)}
+                                value={content}
+                                onChange={(e) => setContent(e.target.value)}
                             />
                         </Form.Group>
                     </Form>

@@ -41,7 +41,7 @@ function Login({ setIsAuthenticated }) {
                     localStorage.setItem('auth_token', token);
                     localStorage.setItem('user_id',data.id);
                     localStorage.setItem('user', JSON.stringify(data.user)); // Storing user object
-                    console.log(data);
+                    //onsole.log(data);
                     setIsAuthenticated(true);
                     navigate(`/user/${data.id}`);
 
