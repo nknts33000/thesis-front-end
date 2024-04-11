@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
-import { Navbar, Nav, Container, Button, Modal } from 'react-bootstrap';
+import { Navbar, Nav, Container, Button, Modal, NavItem } from 'react-bootstrap';
 import { BrowserRouter as Router, Route, Routes, useNavigate } from 'react-router-dom';
 import Register from './components/SignUpIn/Register';
 import Login from './components/SignUpIn/Login';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import LandingPage from "./components/LandingPage";
 import Profile from "./components/Profile";
-
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {faMessage, faUserFriends, faCaretDown, faBriefcase} from '@fortawesome/free-solid-svg-icons';
 
 function App() {
     return (
@@ -19,10 +20,15 @@ function App() {
 function Main() {
 
     const navigate = useNavigate();
-    const [showModal, setShowModal] = useState(false);
+    const [friendListModal, setFriendListModal] = useState(false);
 
-    const handleShowModal = () => setShowModal(true);
-    const handleCloseModal = () => setShowModal(false);
+    const[messageModal,setMessageModal]=useState(false);
+
+    const handleShowFriendListModal = () => setFriendListModal(true);
+    const handleCloseFriendListModal = () => setFriendListModal(false);
+    const showMessageModal = () => setMessageModal(true);
+    const closeMessageModal = () => setMessageModal(false);
+
 
     const handleLogout = () => {
         // Implement logout logic here if needed
@@ -47,24 +53,49 @@ function Main() {
                                 ? (
                                 <>
                                     <Button onClick={handleLogout} variant="outline-primary">Logout</Button>
-                                <Button onClick={handleShowModal} variant="outline-primary">Friend Requests</Button>
+
                                 </>
                             ) : (
                                 <><Button href="/register" variant="outline-primary">Register</Button> <Button href="/login" variant="outline-primary">Login</Button></>
                             )}
                         </Nav>
+
+                    </Navbar.Collapse>
+                    <Navbar.Collapse>
+                        <Nav className="justify-content-end">
+                            {(localStorage.getItem('auth_token') !== null && localStorage.getItem('auth_token') !== 'null') && (
+                                <>
+                                    <FontAwesomeIcon icon={faBriefcase} style={{ cursor: 'pointer', marginRight: '10px'}} />
+                                    <FontAwesomeIcon onClick={showMessageModal} icon={faMessage} style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px'  }} />
+                                    <FontAwesomeIcon onClick={handleShowFriendListModal} icon={faUserFriends} style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px' }} />
+                                    <FontAwesomeIcon icon={faCaretDown} style={{ cursor: 'pointer', position: 'relative', marginLeft: '10px' }}>
+                                        <span style={{ position: 'absolute', top: '100%', left: '50%', transform: 'translateX(-50%)', display: 'inline-block', width: '0', height: '0', borderTop: '6px solid transparent', borderBottom: '6px solid #000', borderLeft: '6px solid transparent', borderRight: '6px solid transparent' }}></span>
+                                    </FontAwesomeIcon>
+                                </>
+                            )}
+                        </Nav>
                     </Navbar.Collapse>
                 </Container>
-                <Modal show={showModal} onHide={handleCloseModal}>
+                <Modal show={friendListModal} onHide={handleCloseFriendListModal}>
                     <Modal.Header closeButton>
                         <Modal.Title>Friend Requests</Modal.Title>
                     </Modal.Header>
                     <Modal.Body>
-                        {/* Add your friend request content here */}
                         <p>List of friend requests...</p>
                     </Modal.Body>
                     <Modal.Footer>
-                        <Button variant="secondary" onClick={handleCloseModal}>Close</Button>
+                        <Button variant="secondary" onClick={handleCloseFriendListModal}>Close</Button>
+                    </Modal.Footer>
+                </Modal>
+                <Modal show={messageModal} onHide={closeMessageModal}>
+                    <Modal.Header closeButton>
+                        <Modal.Title>Messages</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        <p>List of messages...</p>
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <Button variant="secondary" onClick={handleCloseFriendListModal}>Close</Button>
                     </Modal.Footer>
                 </Modal>
             </Navbar>
@@ -72,10 +103,7 @@ function Main() {
             <div className="container">
 
                 <Routes>
-                    <Route
-                        path="/login"
-                        element={<Login/>}
-                    />
+                    <Route path="/login" element={<Login/>}/>
                     <Route path="/register" element={<Register />} />
                     <Route path="/user/:id" element={<LandingPage/>} />
                     <Route path="/profile" element={<Profile />} />

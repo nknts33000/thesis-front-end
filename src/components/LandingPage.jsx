@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Button, Modal, Form, Card } from 'react-bootstrap';
-import { useParams } from "react-router-dom";
+import {useNavigate, useParams} from "react-router-dom";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faThumbsUp, faComment, faShare} from '@fortawesome/free-solid-svg-icons';
 function LandingPage() {
@@ -8,8 +8,14 @@ function LandingPage() {
     const [content, setContent] = useState('');
     const [posts, setPosts] = useState([]);
     const { id } = useParams();
+    const navigate = useNavigate();
+
+
 
     useEffect(() => {
+        if(localStorage.getItem('auth_token')===null || localStorage.getItem('auth_token')==='null'){
+            navigate('/login');
+        }
         const fetchPosts = async () => {
             const token = localStorage.getItem('auth_token');
             const headers = {
@@ -29,7 +35,7 @@ function LandingPage() {
                 setPosts(data);
             } else {
                 console.error('Failed to fetch posts');
-            }
+        }
         };
 
         fetchPosts();
