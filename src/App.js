@@ -4,7 +4,7 @@ import { BrowserRouter as Router, Route, Routes, useNavigate } from 'react-route
 import Register from './components/SignUpIn/Register';
 import Login from './components/SignUpIn/Login';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import User from "./components/User";
+import LandingPage from "./components/LandingPage";
 import Profile from "./components/Profile";
 
 
@@ -17,8 +17,8 @@ function App() {
 }
 
 function Main() {
+
     const navigate = useNavigate();
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [showModal, setShowModal] = useState(false);
 
     const handleShowModal = () => setShowModal(true);
@@ -28,7 +28,6 @@ function Main() {
         // Implement logout logic here if needed
         // For example, clearing the auth token from localStorage
         localStorage.removeItem('auth_token');
-        setIsAuthenticated(false);
         // Redirect to the login page
         navigate('/login');
     };
@@ -42,7 +41,10 @@ function Main() {
                     <Navbar.Collapse id="basic-navbar-nav">
                         <Nav className="mr-auto">
 
-                            {isAuthenticated ? (
+                            {(localStorage.getItem('auth_token') !==null
+                                &&
+                                localStorage.getItem('auth_token')!=='null')
+                                ? (
                                 <>
                                     <Button onClick={handleLogout} variant="outline-primary">Logout</Button>
                                 <Button onClick={handleShowModal} variant="outline-primary">Friend Requests</Button>
@@ -72,10 +74,10 @@ function Main() {
                 <Routes>
                     <Route
                         path="/login"
-                        element={<Login setIsAuthenticated={setIsAuthenticated} />}
+                        element={<Login/>}
                     />
                     <Route path="/register" element={<Register />} />
-                    <Route path="/user/:id" element={<User/>} />
+                    <Route path="/user/:id" element={<LandingPage/>} />
                     <Route path="/profile" element={<Profile />} />
                 </Routes>
             </div>

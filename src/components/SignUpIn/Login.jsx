@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import {Container, Form, Button, Row, Col, Modal} from 'react-bootstrap';
 import {useNavigate} from "react-router-dom";
 
-function Login({ setIsAuthenticated }) {
+function Login() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [show, setShow] = useState(false);
@@ -40,11 +40,7 @@ function Login({ setIsAuthenticated }) {
                     const token = data.token;
                     localStorage.setItem('auth_token', token);
                     localStorage.setItem('user_id',data.id);
-                    localStorage.setItem('user', JSON.stringify(data.user)); // Storing user object
-                    //onsole.log(data);
-                    setIsAuthenticated(true);
                     navigate(`/user/${data.id}`);
-//
                 })
                 .catch((err) => {
                     handleModalShow(err.message, "An error has occurred.");
