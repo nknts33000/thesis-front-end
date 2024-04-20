@@ -1,0 +1,7 @@
+.comment-input {
+    width: 100%;
+    min-height: 50px; /* Set a minimum height to prevent the textarea from collapsing */
+    resize: vertical; /* Allow vertical resizing */
+    overflow-y: auto; /* Add vertical scroll if needed */
+    /* Add any additional styling here */
+}

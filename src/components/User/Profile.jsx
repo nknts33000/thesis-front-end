@@ -1,7 +1,18 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import { Container, Row, Col, Image, Button, Card } from 'react-bootstrap';
+import {useNavigate} from "react-router-dom";
 
 const ProfilePage = () => {
+    const navigate=useNavigate();
+
+    useEffect(()=>{
+        const token=localStorage.getItem('auth_token');
+        if(token===null || token==='null'){
+            navigate('/login');
+        }
+    })
+
+
     return (
         <Container>
             <Row className="mt-4">
@@ -15,7 +26,9 @@ const ProfilePage = () => {
                         </Card.Body>
                     </Card>
                 </Col>
-                <Col xs={12} md={8}>
+            </Row>
+            <Row className="mt-4">
+                <Col xs={12} md={12}> {/* Adjusted column size to cover the full width on smaller screens */}
                     <Card>
                         <Card.Body>
                             <Card.Title>About Me</Card.Title>
@@ -31,6 +44,7 @@ const ProfilePage = () => {
                 </Col>
             </Row>
         </Container>
+
     );
 };
 

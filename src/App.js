@@ -4,8 +4,8 @@ import { BrowserRouter as Router, Route, Routes, useNavigate } from 'react-route
 import Register from './components/SignUpIn/Register';
 import Login from './components/SignUpIn/Login';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import LandingPage from "./components/LandingPage";
-import Profile from "./components/Profile";
+import LandingPage from "./components/User/LandingPage";
+import Profile from "./components/User/Profile";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {faMessage, faUserFriends, faCaretDown, faBriefcase} from '@fortawesome/free-solid-svg-icons';
 
