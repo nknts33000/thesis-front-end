@@ -35,13 +35,44 @@ function LandingPage() {
                 const data = await response.json();
                 console.log(data);
                 setPosts(data);
+                //fetchComments(data);
             } else {
                 console.error('Failed to fetch posts');
             }
         };
 
+
+        // const fetchComments = async (posts) => {
+        //     const token = localStorage.getItem('auth_token');
+        //     const headers = {
+        //         'Authorization': `Bearer ${token}`
+        //     };
+        //
+        //     // Use Promise.all to handle multiple fetch requests simultaneously
+        //     const updatedPosts = await Promise.all(posts.map(async (post) => {
+        //         console.log(post)
+        //         const response = await fetch(`http://localhost:8080/user/getComments/${post.post.postId}`, {
+        //             method: 'GET',
+        //             headers: headers
+        //         });
+        //
+        //         if (response.ok) {
+        //             const comments = await response.json();
+        //             console.log("comments");
+        //             console.log(comments)
+        //             post.comments = comments; // Store the comments in the post object
+        //         } else {
+        //             post.comments = []; // Default to an empty array if fetching fails
+        //             console.error('Failed to fetch comments for post:', post.postId);
+        //         }
+        //         return post; // Return the post with or without new comments
+        //     }));
+        //
+        //     // Update the posts state with comments included
+        //     setPosts(updatedPosts);
+        // };
         fetchPosts();
-    }, []);
+    }, [navigate]);
 
     const handleShowModal = () => setShowModal(true);
     const handleCloseModal = () => setShowModal(false);
@@ -65,25 +96,71 @@ function LandingPage() {
         handleCloseModal();
     };
 
-    const handleCommentChange = (postId, event) => {
+    const handleCommentChange = (index, event) => {
         const { value } = event.target;
         setNewComments(prevState => ({
             ...prevState,
-            [postId]: value
+            [index]: value
         }));
+
     };
 
-    const submitComment = (postId) => {
-        const newComment = newComments[postId];
-        // Add logic to submit the comment to the backend or update state accordingly
-        // For now, let's just log the new comment
-        console.log(`New comment for post ${postId}: ${newComment}`);
-        // Optionally, you can clear the input field after submitting the comment
-        setNewComments(prevState => ({
-            ...prevState,
-            [postId]: ''
-        }));
+    const submitComment = async (index) => {
+        const post = posts[index]; // Access the specific post using the index
+
+        if (!post || !post.post) {
+            console.error("Invalid post or postId");
+            return;
+        }
+        const post_id = post.post.postId;
+        console.log("postId submit comment:"+post_id)
+        //console.log(newComments[index])
+        const content = newComments[index];
+        console.log(content)
+        if (!content || content.trim() === '') {
+            console.log("Comment is empty.");
+            return;
+        }
+        const token = localStorage.getItem('auth_token');
+        const headers = {
+            'Content-type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        };
+
+
+
+        const body = {
+            token : token,
+            content : content,
+            post_id : post_id.toString() // Assuming each post has an 'id' field
+        };
+
+        const url = 'http://localhost:8080/user/addComment'; // Update this URL to your server's URL for posting comments
+
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify(body)
+            });
+
+            if (response.ok) {
+                const data = await response;
+                console.log("Comment submitted:", data);
+                // Optionally update UI or state here
+                setNewComments(prevState => ({
+                    ...prevState,
+                    [post_id]: '' // Clear input field after successful submission
+                }));
+                // Refresh comments or manage state updates as needed
+            } else {
+                throw new Error('Failed to submit comment');
+            }
+        } catch (error) {
+            console.error("Error submitting comment:", error);
+        }
     };
+
 
     return (
         <Container className="mt-5">
@@ -92,7 +169,9 @@ function LandingPage() {
             <Button variant="primary" onClick={handleShowModal}>New post</Button>
 
             {posts.length > 0 ? (
+
                 posts.map((post, index) => (
+
                     <Card key={index} className="mt-3">
                         <Card.Title>
                             <Image
@@ -102,8 +181,8 @@ function LandingPage() {
                             />
                         </Card.Title>
                         <Card.Body>
-                            <Card.Title>{post.userdto.firstname} {post.userdto.lastname}</Card.Title>
-                            <Card.Text>{post.post.content}</Card.Text>
+                            <Card.Title>{post.firstname} {post.lastname}</Card.Title>
+                            <Card.Text>{post.post.content }</Card.Text>
                             <div>
                                 <FontAwesomeIcon icon={faThumbsUp} style={{cursor: 'pointer', marginRight: '10px'}} />
                                 <FontAwesomeIcon icon={faComment} style={{cursor: 'pointer', marginRight: '10px'}} />
@@ -123,10 +202,28 @@ function LandingPage() {
                                     className="comment-input"
                                 />
                                 <button onClick={() => submitComment(index)}>Post</button>
+
                             </div>
                             {/* Existing comments */}
-                            <div className="existing-comments">
-                                {/* Map through existing comments and display them */}
+                            <div className="existing-comments mb-2">
+                                {post.comments.map((comment, cIndex) => (
+                                    <div key={cIndex} className="p-2 border rounded my-1 bg-light">
+
+                                        {/* Display commentator's profile picture */}
+                                        <div className="commentator-info">
+                                            <Image
+                                                src={comment.picture_url ? comment.user.picture_url : ""}
+                                                roundedCircle
+                                                style={{ marginRight: '10px', width: '30px', height: '30px' }}
+                                            />
+                                            <strong>{comment.firstname} {comment.lastname}</strong>
+                                        </div>
+                                        {/* Comment text */}
+                                        <div>{comment.content}</div>
+
+
+                                    </div>
+                                ))}
                             </div>
 
                         </div>
