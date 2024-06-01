@@ -1,5 +1,17 @@
 import React, {useEffect, useState} from 'react';
-import { Navbar, Nav, Container, Button, Modal, NavItem } from 'react-bootstrap';
+import {
+    Navbar,
+    Nav,
+    Container,
+    Button,
+    Modal,
+    NavItem,
+    Dropdown,
+    DropdownButton,
+    Table,
+    Row,
+    Col
+} from 'react-bootstrap';
 import { BrowserRouter as Router, Route, Routes, useNavigate } from 'react-router-dom';
 import Register from './components/SignUpIn/Register';
 import Login from './components/SignUpIn/Login';
@@ -9,6 +21,11 @@ import Profile from "./components/User/Profile";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {faMessage, faUserFriends, faCaretDown, faBriefcase} from '@fortawesome/free-solid-svg-icons';
 import axios from "axios";
+import Companies from "./components/Company/Companies";
+import Advert from "./components/Advert/Advert";
+import JobSearch from "./components/Advert/JobSearch";
+import CreateCompany from "./components/Company/CreateCompany";
+import CreateAdvert from "./components/Advert/CreateAdvert";
 
 
 function App() {
@@ -31,6 +48,9 @@ function Main() {
     const showMessageModal = () => setMessageModal(true);
     const closeMessageModal = () => setMessageModal(false);
 
+    const toJobSearch = () => {
+        navigate('/search')
+    }
 
     // useEffect(() => {
     //     console.log(localStorage.getItem('auth_token'))
@@ -96,15 +116,33 @@ function Main() {
 
                     </Navbar.Collapse>
                     <Navbar.Collapse>
-                        <Nav className="justify-content-end">
+                        <Nav className="justify-content-end nav-icons">
                             {(localStorage.getItem('auth_token') !== null && localStorage.getItem('auth_token') !== 'null') && (
                                 <>
-                                    <FontAwesomeIcon icon={faBriefcase} style={{ cursor: 'pointer', marginRight: '10px'}} />
-                                    <FontAwesomeIcon onClick={showMessageModal} icon={faMessage} style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px'  }} />
-                                    <FontAwesomeIcon onClick={handleShowFriendListModal} icon={faUserFriends} style={{ cursor: 'pointer', marginLeft: '10px', marginRight: '10px' }} />
-                                    <FontAwesomeIcon icon={faCaretDown} style={{ cursor: 'pointer', position: 'relative', marginLeft: '10px' }}>
-                                        <span style={{ position: 'absolute', top: '100%', left: '50%', transform: 'translateX(-50%)', display: 'inline-block', width: '0', height: '0', borderTop: '6px solid transparent', borderBottom: '6px solid #000', borderLeft: '6px solid transparent', borderRight: '6px solid transparent' }}></span>
-                                    </FontAwesomeIcon>
+                                    <div className="icon-container" onClick={toJobSearch} style={{'margin-right':'10px'}}>
+                                        <FontAwesomeIcon icon={faBriefcase} className="icon"/>
+                                        <div className="icon-label">Jobs</div>
+                                    </div>
+                                    <div className="icon-container" onClick={showMessageModal} style={{'margin-right':'10px'}}>
+                                        <FontAwesomeIcon icon={faMessage} className="icon"/>
+                                        <div className="icon-label">Messages</div>
+                                    </div>
+                                    <div className="icon-container" onClick={handleShowFriendListModal}>
+                                        <FontAwesomeIcon icon={faUserFriends} className="icon"/>
+                                        <div className="icon-label">Requests</div>
+                                    </div>
+                                    <div className="icon-container" style={{'margin-top':'21px','margin-left':'15px'}}>
+                                        <Dropdown>
+                                            <Dropdown.Toggle variant="Secondary" className="p-0 custom-caret-toggle">
+                                                More
+                                            </Dropdown.Toggle>
+                                            <Dropdown.Menu className="custom-dropdown-menu">
+                                                <Dropdown.Item onClick={() => navigate('/profile')}>Profile</Dropdown.Item>
+                                                <Dropdown.Item onClick={() => navigate('/companies')}>My Companies</Dropdown.Item>
+                                                <Dropdown.Item onClick={handleLogout}>Logout</Dropdown.Item>
+                                            </Dropdown.Menu>
+                                        </Dropdown>
+                                    </div>
                                 </>
                             )}
                         </Nav>
@@ -141,6 +179,11 @@ function Main() {
                     <Route path="/register" element={<Register />} />
                     <Route path="/user/:id" element={<LandingPage/>} />
                     <Route path="/profile" element={<Profile />} />
+                    <Route path="/companies" element={<Companies/>}/>
+                    <Route path="/createCompany" element={<CreateCompany/>}/>
+                    <Route path="/advert" element={<Advert/>}/>
+                    <Route path="/createAdvert" element={<CreateAdvert/>}/>
+                    <Route path="/search" element={<JobSearch/>}/>
                 </Routes>
             </div>
         </>

@@ -36,3 +36,28 @@
     transform: rotate(360deg);
   }
 }
+
+.nav-icons {
+  display: flex;
+  align-items: center;
+}
+
+.nav-icons .icon-container {
+  margin-right: 20px; /* Add more margin to separate icons */
+  text-align: center; /* Center the text */
+}
+
+.nav-icons .icon-container:last-child {
+  margin-right: 0; /* Remove margin from the last icon */
+}
+
+.nav-icons .icon-container .icon {
+  cursor: pointer;
+  margin-right: 5px; /* Add margin to the right of the icon */
+}
+
+.nav-icons .icon-container .icon-label {
+  font-size: 0.75rem;
+  color: #333; /* Adjust the color to fit your design */
+}
+
