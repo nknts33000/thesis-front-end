@@ -58,36 +58,6 @@ function Main() {
 
     const handleLogout = async () => {
 
-        // const url = 'http://localhost:8080/logout';
-        // const token = localStorage.getItem('auth_token');
-        //
-        // try {
-        //     const response = await axios.post(url, {
-        //         method: 'POST',
-        //         headers: {
-        //             'Content-Type': 'application/json',
-        //             'Authorization': `Bearer ${token}` // Send token in a more standard way
-        //         },
-        //         //body: {token}
-        //     });
-        //
-        //
-        //     console.log('response'+response)
-        //
-        //     if (response.ok) {
-        //         localStorage.removeItem('auth_token');
-        //         navigate('/login');
-        //     } else {
-        //         throw new Error('Failed to log out');
-        //     }
-        // } catch (error) {
-        //     console.error(error);
-        // }
-
-
-        // Implement logout logic here if needed
-        // For example, clearing the auth token from localStorage
-        // Redirect to the login page.
         localStorage.removeItem('auth_token');
         navigate('/login');
     };

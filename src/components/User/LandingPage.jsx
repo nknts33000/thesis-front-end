@@ -41,36 +41,6 @@ function LandingPage() {
             }
         };
 
-
-        // const fetchComments = async (posts) => {
-        //     const token = localStorage.getItem('auth_token');
-        //     const headers = {
-        //         'Authorization': `Bearer ${token}`
-        //     };
-        //
-        //     // Use Promise.all to handle multiple fetch requests simultaneously
-        //     const updatedPosts = await Promise.all(posts.map(async (post) => {
-        //         console.log(post)
-        //         const response = await fetch(`http://localhost:8080/user/getComments/${post.post.postId}`, {
-        //             method: 'GET',
-        //             headers: headers
-        //         });
-        //
-        //         if (response.ok) {
-        //             const comments = await response.json();
-        //             console.log("comments");
-        //             console.log(comments)
-        //             post.comments = comments; // Store the comments in the post object
-        //         } else {
-        //             post.comments = []; // Default to an empty array if fetching fails
-        //             console.error('Failed to fetch comments for post:', post.postId);
-        //         }
-        //         return post; // Return the post with or without new comments
-        //     }));
-        //
-        //     // Update the posts state with comments included
-        //     setPosts(updatedPosts);
-        // };
         fetchPosts();
     }, [navigate]);
 

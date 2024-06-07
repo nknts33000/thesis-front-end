@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Container, Row, Col, Image, Card, Button, Modal, Form } from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom';
+import {json, useNavigate} from 'react-router-dom';
 import axios from 'axios';
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {faComment, faShare, faThumbsUp} from "@fortawesome/free-solid-svg-icons";
+import {forEach} from "react-bootstrap/ElementChildren";
 
 const ProfilePage = () => {
     const navigate = useNavigate();
@@ -9,33 +12,131 @@ const ProfilePage = () => {
     const [profile, setProfile] = useState(null);
     const [experiences, setExperiences] = useState([]);
     const [education, setEducation] = useState([]);
+    const [posts, setPosts] = useState({});
     const [showExpModal, setShowExpModal] = useState(false);
     const [showEduModal, setShowEduModal] = useState(false);
     const [currentExp, setCurrentExp] = useState({});
     const [currentEdu, setCurrentEdu] = useState({});
+    const [newComments, setNewComments] = useState({}); // State variable for new comments
+    const token = localStorage.getItem('auth_token');
 
     useEffect(() => {
-        const token = localStorage.getItem('auth_token');
+        console.log('token:'+token)
         if (token === null || token === 'null') {
             navigate('/login');
         } else {
             axios.get(`http://localhost:8080/user/getUser/${token}`, { headers:
-                    { "Content-Type": "application/json", Authorization: `Bearer ${token}` } })
+                    { "Content-Type": "Application/Json", Authorization: `Bearer ${token}` } })
                 .then(response => {
                     setUser(response.data);
-                    console.log(response.data)
-                    setProfile(response.data.profile);
-                    setEducation(response.data.education);
-                    setExperiences(response.data.experiences);
-                    console.log(response.data.experiences)
+                })
+                .catch(error => {
+                    console.error("There was an error fetching the user!", error);
+                });
+        }
+    }, [token,navigate]);
+
+    useEffect(() => {
+        if (user) {
+            axios.get(`http://localhost:8080/user/getProfile/${user.id}`, { headers: { "Content-Type": "Application/Json", Authorization: `Bearer ${token}` } })
+                .then(response => {
+                    setProfile(response.data);
                 })
                 .catch(error => {
                     console.error("There was an error fetching the profile!", error);
                 });
-        }
-    }, [navigate]);
 
-    const handleSaveExperience = () => {
+            axios.get(`http://localhost:8080/user/getExperiences/${user.id}`, { headers: { "Content-Type": "Application/Json", Authorization: `Bearer ${token}` } })
+                .then(response => {
+                    setExperiences(response.data);
+                })
+                .catch(error => {
+                    console.error("There was an error fetching the experiences!", error);
+                });
+
+            axios.get(`http://localhost:8080/user/getEducation/${user.id}`, { headers: { "Content-Type": "Application/Json", Authorization: `Bearer ${token}` } })
+                .then(response => {
+                    setEducation(response.data);
+                })
+                .catch(error => {
+                    console.error("There was an error fetching the education!", error);
+                });
+
+            axios.get(`http://localhost:8080/user/getPosts/${user.id}`, { headers: { "Content-Type": "Application/Json", Authorization: `Bearer ${token}` } })
+                .then(response => {
+                    setPosts(response.data);
+                    console.log(response.data)
+        })
+                .catch(error => {
+                    console.error("There was an error fetching the posts!", error);
+                });
+        }
+    }, [user, token]);
+
+    const handleCommentChange = (index, event) => {
+        const { value } = event.target;
+        setNewComments(prevState => ({
+            ...prevState,
+            [index]: value
+        }));
+
+    };
+
+    const submitComment = async (index) => {
+        const post = posts[index]; // Access the specific post using the index
+
+        console.log(post)
+        if (!post) {
+            console.error("Invalid post or postId");
+            return;
+        }
+        const post_id = post.postId;
+        console.log("postId submit comment:"+post_id)
+        //console.log(newComments[index])
+        const content = newComments[index];
+        console.log(content)
+        if (!content || content.trim() === '') {
+            console.log("Comment is empty.");
+            return;
+        }
+        const token = localStorage.getItem('auth_token');
+        const headers = {
+            'Content-type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        }
+        const body = {
+            token : token,
+            content : content,
+            post_id : post_id.toString() // Assuming each post has an 'id' field
+        };
+
+        const url = 'http://localhost:8080/user/addComment'; // Update this URL to your server's URL for posting comments
+
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify(body)
+            });
+
+            if (response.ok) {
+                const data = await response;
+                console.log("Comment submitted:", data);
+                // Optionally update UI or state here
+                setNewComments(prevState => ({
+                    ...prevState,
+                    [post_id]: '' // Clear input field after successful submission
+                }));
+                // Refresh comments or manage state updates as needed
+            } else {
+                throw new Error('Failed to submit comment');
+            }
+        } catch (error) {
+            console.error("Error submitting comment:", error);
+        }
+    };
+
+        const handleSaveExperience = () => {
         if (currentExp.experience_id) {
             axios.put(`http://localhost:8080/experience/${currentExp.experience_id}`,{headers:{
                 "content-type":"application/json",Authorization: `Bearer ${localStorage.getItem('auth_token')}`}},
@@ -119,7 +220,7 @@ const ProfilePage = () => {
                     <Card>
                         <Card.Body>
                             <Image src={profile.picture_url || "https://via.placeholder.com/150"} roundedCircle className="mb-3" />
-                            <Card.Title>{user.name}</Card.Title>
+                            <Card.Title>{user.firstname+" "+user.lastname}</Card.Title>
                             <Card.Text>{profile.headline}</Card.Text>
                             <Card.Text><small className="text-muted">{profile.industry}</small></Card.Text>
                         </Card.Body>
@@ -175,6 +276,77 @@ const ProfilePage = () => {
                     </Card>
                 </Col>
             </Row>
+
+            <Row className="mt-4">
+                <Col xs={12}>
+                    {posts.length > 0 ? (
+
+                        posts.map((post, index) => (
+
+                            <Card key={index} className="mt-3">
+                                <Card.Title>
+                                    <Image
+                                        src={profile && profile.picture_url ? profile.picture_url : ""}
+                                        roundedCircle
+                                        style={{ marginRight: '10px', width: '30px', height: '30px' }}
+                                    />
+                                </Card.Title>
+                                <Card.Body>
+                                    <Card.Title>{user.firstname} {user.lastname}</Card.Title>
+                                    <Card.Text>{post.content }</Card.Text>
+                                    <div>
+                                        <FontAwesomeIcon icon={faThumbsUp} style={{cursor: 'pointer', marginRight: '10px'}} />
+                                        <FontAwesomeIcon icon={faComment} style={{cursor: 'pointer', marginRight: '10px'}} />
+                                        <FontAwesomeIcon icon={faShare} style={{cursor: 'pointer', marginRight: '10px'}} />
+                                    </div>
+                                </Card.Body>
+                                {/* Comments section */}
+                                <div className="comments-section">
+
+
+                                    {/* New comment input */}
+                                    <div className="new-comment-input">
+                                <textarea
+                                    value={newComments[index] || ''}
+                                    onChange={(event) => handleCommentChange(index, event)}
+                                    placeholder="Add a comment..."
+                                    className="comment-input"
+                                />
+                                        <button onClick={() => submitComment(index)}>Post</button>
+
+                                    </div>
+                                    {/* Existing comments */}
+                                    <div className="existing-comments mb-2">
+                                        {post.comments.map((comment, cIndex) => (
+                                            <div key={cIndex} className="p-2 border rounded my-1 bg-light">
+
+                                                {/* Display commentator's profile picture */}
+                                                <div className="commentator-info">
+                                                    <Image
+                                                        src={comment.picture_url ? comment.user.picture_url : ""}
+                                                        roundedCircle
+                                                        style={{ marginRight: '10px', width: '30px', height: '30px' }}
+                                                    />
+                                                    <strong>{comment.firstname} {comment.lastname}</strong>
+                                                </div>
+                                                {/* Comment text */}
+                                                <div>{comment.content}</div>
+
+
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                </div>
+                            </Card>
+                        ))
+                    ) : (
+                        <div className="mt-3">No posts yet.</div>
+                    )}
+                </Col>
+            </Row>
+
+
             <Modal show={showExpModal} onHide={() => setShowExpModal(false)}>
                 <Modal.Header closeButton>
                     <Modal.Title>{currentExp.experience_id ? 'Edit Experience' : 'Add Experience'}</Modal.Title>
@@ -183,15 +355,18 @@ const ProfilePage = () => {
                     <Form>
                         <Form.Group controlId="formExperienceTitle">
                             <Form.Label>Title</Form.Label>
-                            <Form.Control type="text" placeholder="Enter title" value={currentExp.title || ''} onChange={e => setCurrentExp({ ...currentExp, title: e.target.value })} />
+                            <Form.Control type="text" placeholder="Enter title" value={currentExp.title || ''}
+                                          onChange={e => setCurrentExp({...currentExp, title: e.target.value})}/>
                         </Form.Group>
                         <Form.Group controlId="formExperienceCompany">
                             <Form.Label>Company</Form.Label>
-                            <Form.Control type="text" placeholder="Enter company" value={currentExp.company_name || ''} onChange={e => setCurrentExp({ ...currentExp, company_name: e.target.value })} />
+                            <Form.Control type="text" placeholder="Enter company" value={currentExp.company_name || ''}
+                                          onChange={e => setCurrentExp({...currentExp, company_name: e.target.value})}/>
                         </Form.Group>
                         <Form.Group controlId="formExperienceLocation">
                             <Form.Label>Location</Form.Label>
-                            <Form.Control type="text" placeholder="Enter location" value={currentExp.location || ''} onChange={e => setCurrentExp({ ...currentExp, location: e.target.value })} />
+                            <Form.Control type="text" placeholder="Enter location" value={currentExp.location || ''}
+                                          onChange={e => setCurrentExp({...currentExp, location: e.target.value})}/>
                         </Form.Group>
                         <Form.Group controlId="formExperienceStartDate">
                             <Form.Label>Start Date</Form.Label>
@@ -246,4 +421,3 @@ const ProfilePage = () => {
 };
 
 export default ProfilePage;
-
