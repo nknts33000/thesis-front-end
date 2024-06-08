@@ -3,8 +3,7 @@ import { Container, Row, Col, Image, Card, Button, Modal, Form } from 'react-boo
 import {json, useNavigate} from 'react-router-dom';
 import axios from 'axios';
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faComment, faShare, faThumbsUp} from "@fortawesome/free-solid-svg-icons";
-import {forEach} from "react-bootstrap/ElementChildren";
+import {faComment, faShare, faThumbsUp, faPencilAlt, faTrash, faPlusCircle} from "@fortawesome/free-solid-svg-icons";
 
 const ProfilePage = () => {
     const navigate = useNavigate();
@@ -219,7 +218,8 @@ const ProfilePage = () => {
                 <Col xs={12} md={4}>
                     <Card>
                         <Card.Body>
-                            <Image src={profile.picture_url || "https://via.placeholder.com/150"} roundedCircle className="mb-3" />
+                            <Image src={profile.picture_url || "https://via.placeholder.com/150"} roundedCircle className="mb-3" style={{ objectFit: 'cover' }} />
+                            <FontAwesomeIcon icon={faPlusCircle} size="lg" className="ml-2" />
                             <Card.Title>{user.firstname+" "+user.lastname}</Card.Title>
                             <Card.Text>{profile.headline}</Card.Text>
                             <Card.Text><small className="text-muted">{profile.industry}</small></Card.Text>
@@ -229,7 +229,7 @@ const ProfilePage = () => {
                 <Col xs={12} md={8}>
                     <Card>
                         <Card.Body>
-                            <Card.Title>About Me</Card.Title>
+                            <Card.Title>About Me <FontAwesomeIcon icon={faPencilAlt} className="ml-2" style={{ cursor: 'pointer' }} onClick={() => console.log('Edit About Me')} /></Card.Title>
                             <Card.Text>{profile.summary}</Card.Text>
                         </Card.Body>
                     </Card>
@@ -243,11 +243,15 @@ const ProfilePage = () => {
                             <Button onClick={() => handleShowExpModal()}>Add Experience</Button>
                             {experiences.length > 0 ? experiences.map(exp => (
                                 <div key={exp.experience_id}>
-                                    <h5>{exp.title}</h5>
+                                    <h5>{exp.title}
+                                        <FontAwesomeIcon icon={faPencilAlt} className="ml-2" style={{ cursor: 'pointer' }} onClick={() => handleShowExpModal(exp)} />
+                                        <FontAwesomeIcon icon={faTrash} className="ml-2" style={{ cursor: 'pointer' }} onClick={() => handleDeleteExperience(exp)} />
+                                    </h5>
                                     <p>{exp.company_name}</p>
                                     <p>{exp.location}</p>
                                     <p>{new Date(exp.start_date).toLocaleDateString()} - {new Date(exp.end_date).toLocaleDateString()}</p>
-                                    <Button variant="secondary" onClick={() => handleShowExpModal(exp)}>Edit</Button>
+
+                                    {/*<Button variant="secondary" onClick={() => handleShowExpModal(exp)}>Edit</Button>*/}
                                     <Button variant="danger" onClick={() => handleDeleteExperience(exp.experience_id)}>Delete</Button>
                                     <hr />
                                 </div>
