@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import { Container, Row, Col, Image, Card, Button, Modal, Form } from 'react-bootstrap';
 import {json, useNavigate} from 'react-router-dom';
 import axios from 'axios';
@@ -18,6 +18,8 @@ const ProfilePage = () => {
     const [currentEdu, setCurrentEdu] = useState({});
     const [newComments, setNewComments] = useState({}); // State variable for new comments
     const token = localStorage.getItem('auth_token');
+    const [selectedImage, setSelectedImage] = useState(null); // State for the selected image
+    const fileInputRef = useRef(null); // Reference for the hidden file input
 
     useEffect(() => {
         console.log('token:'+token)
@@ -71,6 +73,43 @@ const ProfilePage = () => {
                 });
         }
     }, [user, token]);
+
+
+    const handleImageClick = () => {
+        fileInputRef.current.click(); // Trigger click on file input
+    };
+
+    const handleFileChange = (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                setSelectedImage(e.target.result);
+            };
+            reader.readAsDataURL(file);
+
+            // Upload the image to the server if needed
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('user_id', user.id); // assuming user ID is needed for server-side
+
+            axios.post('http://localhost:8080/user/uploadProfilePicture', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    Authorization: `Bearer ${token}`
+                }
+            })
+                .then(response => {
+                    console.log('Image uploaded successfully:', response.data);
+                    // Optionally, update the profile with the new image URL
+                    setProfile(prev => ({ ...prev, picture_url: response.data.picture_url }));
+                })
+                .catch(error => {
+                    console.error('Error uploading image:', error);
+                });
+        }
+    };
+
 
     const handleCommentChange = (index, event) => {
         const { value } = event.target;
@@ -137,14 +176,31 @@ const ProfilePage = () => {
 
         const handleSaveExperience = () => {
         if (currentExp.experience_id) {
-            axios.put(`http://localhost:8080/experience/${currentExp.experience_id}`,{headers:{
-                "content-type":"application/json",Authorization: `Bearer ${localStorage.getItem('auth_token')}`}},
-                currentExp)
+            // axios.put(`http://localhost:8080/experience/${currentExp.experience_id}`,{headers:{
+            //     "content-type":"application/json",Authorization: `Bearer ${localStorage.getItem('auth_token')}`}},
+            //     currentExp)
+            //     .then(response => {
+            //         setExperiences(experiences.map(exp => exp.experience_id === currentExp.experience_id ? response.data : exp));
+            //         setShowExpModal(false);
+            //     })
+            //     .catch(error => console.error(error));
+
+            axios.put(
+                `http://localhost:8080/user/updateExperience/${user.id}`,
+                currentExp, // The data to be sent in the request body
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${localStorage.getItem('auth_token')}`
+                    }
+                }
+            )
                 .then(response => {
-                    setExperiences(experiences.map(exp => exp.experience_id === currentExp.experience_id ? response.data : exp));
+                    setExperiences([...experiences, response.data]);
                     setShowExpModal(false);
                 })
                 .catch(error => console.error(error));
+
         } else {
             axios.post(
                 `http://localhost:8080/user/addExperience/${user.id}`,
@@ -166,14 +222,33 @@ const ProfilePage = () => {
 
     const handleSaveEducation = () => {
         if (currentEdu.education_id) {
-            axios.put(`http://localhost:8080/education/${currentEdu.education_id}`, currentEdu)
+            axios.put(
+                `http://localhost:8080/user/updateEdu/${user.id}`,
+                currentEdu, // The data to be sent in the request body
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${localStorage.getItem('auth_token')}`
+                    }
+                }
+            )
                 .then(response => {
-                    setEducation(education.map(edu => edu.education_id === currentEdu.education_id ? response.data : edu));
+                    setEducation([...education, response.data]);
                     setShowEduModal(false);
                 })
                 .catch(error => console.error(error));
         } else {
-            axios.post(`http://localhost:8080/education`, currentEdu)
+
+            axios.post(
+                `http://localhost:8080/user/addEducation/${user.id}`,
+                currentEdu, // The data to be sent in the request body
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${localStorage.getItem('auth_token')}`
+                    }
+                }
+            )
                 .then(response => {
                     setEducation([...education, response.data]);
                     setShowEduModal(false);
@@ -183,7 +258,14 @@ const ProfilePage = () => {
     };
 
     const handleDeleteExperience = (experience_id) => {
-        axios.delete(`http://localhost:8080/experience/${experience_id}`)
+        axios.delete(`http://localhost:8080/user/deleteExperience/${experience_id}`,
+            {
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${localStorage.getItem('auth_token')}`
+                }
+            }
+            )
             .then(() => {
                 setExperiences(experiences.filter(exp => exp.experience_id !== experience_id));
             })
@@ -191,7 +273,13 @@ const ProfilePage = () => {
     };
 
     const handleDeleteEducation = (education_id) => {
-        axios.delete(`http://localhost:8080/education/${education_id}`)
+        axios.delete(`http://localhost:8080/user/deleteEducation/${education_id}`,
+            {
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${localStorage.getItem('auth_token')}`
+                }
+            })
             .then(() => {
                 setEducation(education.filter(edu => edu.education_id !== education_id));
             })
@@ -218,9 +306,17 @@ const ProfilePage = () => {
                 <Col xs={12} md={4}>
                     <Card>
                         <Card.Body>
-                            <Image src={profile.picture_url || "https://via.placeholder.com/150"} roundedCircle className="mb-3" style={{ objectFit: 'cover' }} />
-                            <FontAwesomeIcon icon={faPlusCircle} size="lg" className="ml-2" />
-                            <Card.Title>{user.firstname+" "+user.lastname}</Card.Title>
+                            <Image src={profile.picture_url || "https://via.placeholder.com/150"} roundedCircle
+                                   className="mb-3" style={{objectFit: 'cover'}}/>
+                            <FontAwesomeIcon icon={faPlusCircle} size="lg" className="ml-2" onClick={handleImageClick}/>
+                            <input
+                                type="file"
+                                accept="image/*"
+                                ref={fileInputRef}
+                                style={{display: 'none'}}
+                                onChange={handleFileChange}
+                            />
+                            <Card.Title>{user.firstname + " " + user.lastname}</Card.Title>
                             <Card.Text>{profile.headline}</Card.Text>
                             <Card.Text><small className="text-muted">{profile.industry}</small></Card.Text>
                         </Card.Body>
@@ -229,7 +325,9 @@ const ProfilePage = () => {
                 <Col xs={12} md={8}>
                     <Card>
                         <Card.Body>
-                            <Card.Title>About Me <FontAwesomeIcon icon={faPencilAlt} className="ml-2" style={{ cursor: 'pointer' }} onClick={() => console.log('Edit About Me')} /></Card.Title>
+                            <Card.Title>About Me <FontAwesomeIcon icon={faPencilAlt} className="ml-2"
+                                                                  style={{cursor: 'pointer'}}
+                                                                  onClick={() => console.log('Edit About Me')} /></Card.Title>
                             <Card.Text>{profile.summary}</Card.Text>
                         </Card.Body>
                     </Card>
@@ -245,14 +343,14 @@ const ProfilePage = () => {
                                 <div key={exp.experience_id}>
                                     <h5>{exp.title}
                                         <FontAwesomeIcon icon={faPencilAlt} className="ml-2" style={{ cursor: 'pointer' }} onClick={() => handleShowExpModal(exp)} />
-                                        <FontAwesomeIcon icon={faTrash} className="ml-2" style={{ cursor: 'pointer' }} onClick={() => handleDeleteExperience(exp)} />
+                                        <FontAwesomeIcon icon={faTrash} className="ml-2" style={{ cursor: 'pointer' }} onClick={() => handleDeleteExperience(exp.experience_id)} />
                                     </h5>
                                     <p>{exp.company_name}</p>
                                     <p>{exp.location}</p>
                                     <p>{new Date(exp.start_date).toLocaleDateString()} - {new Date(exp.end_date).toLocaleDateString()}</p>
 
                                     {/*<Button variant="secondary" onClick={() => handleShowExpModal(exp)}>Edit</Button>*/}
-                                    <Button variant="danger" onClick={() => handleDeleteExperience(exp.experience_id)}>Delete</Button>
+                                    {/*<Button variant="danger" onClick={() => handleDeleteExperience(exp.experience_id)}>Delete</Button>*/}
                                     <hr />
                                 </div>
                             )) : (<div><h5>No experiences added.</h5></div>)}
@@ -268,11 +366,15 @@ const ProfilePage = () => {
                             <Button onClick={() => handleShowEduModal()}>Add Education</Button>
                             {education.length > 0 ? education.map(edu => (
                                 <div key={edu.education_id}>
-                                    <h5>{edu.degree} in {edu.field_of_study}</h5>
+                                    <h5>
+                                        {edu.degree} in {edu.field_of_study}
+                                        <FontAwesomeIcon icon={faPencilAlt} className="ml-2" style={{ cursor: 'pointer' }} onClick={() => handleShowEduModal(edu)} />
+                                        <FontAwesomeIcon icon={faTrash} className="ml-2" style={{ cursor: 'pointer' }} onClick={() => handleDeleteEducation(edu.education_id)} />
+                                    </h5>
                                     <p>{edu.school_name}</p>
                                     <p>{new Date(edu.start_date).toLocaleDateString()} - {new Date(edu.end_date).toLocaleDateString()}</p>
-                                    <Button variant="secondary" onClick={() => handleShowEduModal(edu)}>Edit</Button>
-                                    <Button variant="danger" onClick={() => handleDeleteEducation(edu.education_id)}>Delete</Button>
+                                    {/*<Button variant="secondary" onClick={() => handleShowEduModal(edu)}>Edit</Button>*/}
+                                    {/*<Button variant="danger" onClick={() => handleDeleteEducation(edu.education_id)}>Delete</Button>*/}
                                     <hr />
                                 </div>
                             )) : (<div><h5>No education added.</h5></div>)}
@@ -395,7 +497,7 @@ const ProfilePage = () => {
                     <Form>
                         <Form.Group controlId="formEducationDegree">
                             <Form.Label>Degree</Form.Label>
-                            <Form.Control type="text" placeholder="Enter degree" value={currentEdu.degree || ''} onChange={e => setCurrentEdu({ ...currentEdu, degree: e.target.value })} />
+                            <Form.Control type="text" placeholder="Enter degree(Bachelor's, Master's etc.)" value={currentEdu.degree || ''} onChange={e => setCurrentEdu({ ...currentEdu, degree: e.target.value })} />
                         </Form.Group>
                         <Form.Group controlId="formEducationField">
                             <Form.Label>Field of Study</Form.Label>
@@ -407,7 +509,7 @@ const ProfilePage = () => {
                         </Form.Group>
                         <Form.Group controlId="formEducationStartDate">
                             <Form.Label>Start Date</Form.Label>
-                            <Form.Control type="date" placeholder="Enter start date" value={new Date(currentEdu.start_date).toLocaleDateString() || ''} onChange={e => setCurrentEdu({ ...currentEdu, start_date: e.target.value })} />
+                            <Form.Control type="date" placeholder="Enter start date" value={currentEdu.start_date || ''} onChange={e => setCurrentEdu({ ...currentEdu, start_date: e.target.value })} />
                         </Form.Group>
                         <Form.Group controlId="formEducationEndDate">
                             <Form.Label>End Date</Form.Label>
