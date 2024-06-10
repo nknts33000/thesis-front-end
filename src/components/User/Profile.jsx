@@ -345,7 +345,6 @@ const ProfilePage = () => {
                                 className="mb-3"
                                 style={{objectFit: 'cover'}}
                             />
-
                             {/*<Image src={profilePicUrl.replace("blob:","") || "https://via.placeholder.com/150"} roundedCircle className="mb-3" style={{objectFit: 'cover'}}/>*/}
                             {/*       className="mb-3" style={{objectFit: 'cover'}}/>
                             {/*<Image src={profile.picture_url || "https://via.placeholder.com/150"} roundedCircle*/}
