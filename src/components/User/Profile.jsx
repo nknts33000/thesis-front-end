@@ -20,6 +20,9 @@ const ProfilePage = () => {
     const token = localStorage.getItem('auth_token');
     const [selectedImage, setSelectedImage] = useState(null); // State for the selected image
     const fileInputRef = useRef(null); // Reference for the hidden file input
+    const [profileId,setProfileId]=useState(null);
+    const [profilePicUrl,setProfilePicUrl]=useState(null);
+
 
     useEffect(() => {
         console.log('token:'+token)
@@ -42,6 +45,10 @@ const ProfilePage = () => {
             axios.get(`http://localhost:8080/user/getProfile/${user.id}`, { headers: { "Content-Type": "Application/Json", Authorization: `Bearer ${token}` } })
                 .then(response => {
                     setProfile(response.data);
+                    console.log(response.data)
+                    const imageUrl = URL.createObjectURL(new Blob([response.data.profilePicture], { type: response.headers['content-type'] }));
+                    setProfilePicUrl(imageUrl);
+                    console.log(imageUrl)
                 })
                 .catch(error => {
                     console.error("There was an error fetching the profile!", error);
@@ -75,6 +82,32 @@ const ProfilePage = () => {
     }, [user, token]);
 
 
+    // useEffect(() => {
+    //     if(profile){
+    //         const fetchProfilePic = async () => {
+    //             try {
+    //                 const response = await axios.get(`http://localhost:8080/user/profilePic/${profileId}`, {
+    //                     responseType: 'arraybuffer', // Ensure binary data is handled correctly
+    //                     headers: {
+    //                         Authorization: `Bearer ${token}`
+    //                     }
+    //                 });
+    //
+    //                 // Create a URL for the image
+    //                 const imageUrl = URL.createObjectURL(new Blob([response.data], { type: response.headers['content-type'] }));
+    //                 setProfilePicUrl(imageUrl);
+    //                 console.log('image url:'+imageUrl);
+    //             } catch (error) {
+    //                 console.error('Error fetching profile picture:', error);
+    //             }
+    //         };
+    //         fetchProfilePic();
+    //     }
+    //
+    //
+    // }, [profileId]);
+
+
     const handleImageClick = () => {
         fileInputRef.current.click(); // Trigger click on file input
     };
@@ -91,9 +124,9 @@ const ProfilePage = () => {
             // Upload the image to the server if needed
             const formData = new FormData();
             formData.append('file', file);
-            formData.append('user_id', user.id); // assuming user ID is needed for server-side
+            //formData.append('user_id', user.id); // assuming user ID is needed for server-side
 
-            axios.post('http://localhost:8080/user/uploadProfilePicture', formData, {
+            axios.put(`http://localhost:8080/user/updateProfPic/${profile.profile_id}`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                     Authorization: `Bearer ${token}`
@@ -306,8 +339,17 @@ const ProfilePage = () => {
                 <Col xs={12} md={4}>
                     <Card>
                         <Card.Body>
-                            <Image src={profile.picture_url || "https://via.placeholder.com/150"} roundedCircle
-                                   className="mb-3" style={{objectFit: 'cover'}}/>
+                            <Image
+                                src={profilePicUrl.startsWith("blob:") ? profilePicUrl : "https://via.placeholder.com/150"}
+                                roundedCircle
+                                className="mb-3"
+                                style={{objectFit: 'cover'}}
+                            />
+
+                            {/*<Image src={profilePicUrl.replace("blob:","") || "https://via.placeholder.com/150"} roundedCircle className="mb-3" style={{objectFit: 'cover'}}/>*/}
+                            {/*       className="mb-3" style={{objectFit: 'cover'}}/>
+                            {/*<Image src={profile.picture_url || "https://via.placeholder.com/150"} roundedCircle*/}
+                            {/*       className="mb-3" style={{objectFit: 'cover'}}/>*/}
                             <FontAwesomeIcon icon={faPlusCircle} size="lg" className="ml-2" onClick={handleImageClick}/>
                             <input
                                 type="file"
