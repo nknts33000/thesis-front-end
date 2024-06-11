@@ -102,6 +102,27 @@ const ProfilePage = () => {
     }, [user, token]);
 
 
+    const getEd = async () => {
+        axios.get(`http://localhost:8080/user/getEducation/${user.id}`, { headers: { "Content-Type": "Application/Json", Authorization: `Bearer ${token}` } })
+            .then(response => {
+                setEducation(response.data);
+            })
+            .catch(error => {
+                console.error("There was an error fetching the education!", error);
+            });
+    };
+
+    const getEx = async () => {
+        axios.get(`http://localhost:8080/user/getExperiences/${user.id}`, { headers: { "Content-Type": "Application/Json", Authorization: `Bearer ${token}` } })
+            .then(response => {
+                setExperiences(response.data);
+                console.log('experiences:'+response.data)
+            })
+            .catch(error => {
+                console.error("There was an error fetching the experiences!", error);
+            });
+    };
+
     const handleAboutMeChange = (event) => {
         setAboutMe(event.target.value);
     };
@@ -232,45 +253,6 @@ const ProfilePage = () => {
         }
     };
 
-    //     const handleSaveExperience = () => {
-    //     if (currentExp.experience_id) {
-    //
-    //         axios.put(
-    //             `http://localhost:8080/user/updateExperience/${user.id}`,
-    //             currentExp, // The data to be sent in the request body
-    //             {
-    //                 headers: {
-    //                     "Content-Type": "application/json",
-    //                     Authorization: `Bearer ${localStorage.getItem('auth_token')}`
-    //                 }
-    //             }
-    //         )
-    //             .then(response => {
-    //                 setExperiences([...experiences, currentExp]);
-    //                 setShowExpModal(false);
-    //             })
-    //             .catch(error => console.error(error));
-    //
-    //     } else {
-    //         console.log(currentExp)
-    //         axios.post(
-    //             `http://localhost:8080/user/addExperience/${user.id}`,
-    //             currentExp, // The data to be sent in the request body
-    //             {
-    //                 headers: {
-    //                     "Content-Type": "application/json",
-    //                     Authorization: `Bearer ${localStorage.getItem('auth_token')}`
-    //                 }
-    //             }
-    //         )
-    //             .then(response => {
-    //                 setExperiences([...experiences, currentExp]);
-    //                 setShowExpModal(false);
-    //             })
-    //             .catch(error => console.error(error));
-    //     }
-    // };
-
     const handleSaveExperience = () => {
         console.log(currentExp.experience_id)
         if (currentExp.experience_id) {
@@ -298,23 +280,6 @@ const ProfilePage = () => {
                 console.error("Experience with provided ID not found.");
             }
         } else {
-            // If education_id doesn't exist, it means we are adding a new education
-            // axios.post(
-            //     `http://localhost:8080/user/addExperience/${user.id}`,
-            //     currentExp,
-            //     {
-            //         headers: {
-            //             "Content-Type": "application/json",
-            //             Authorization: `Bearer ${localStorage.getItem('auth_token')}`
-            //         }
-            //     }
-            // )
-            //     .then(response => {
-            //         setExperiences([...education, currentEdu]);
-            //         setShowExpModal(false);
-            //     })
-            //     .catch(error => console.error(error));
-
                     axios.post(
                         `http://localhost:8080/user/addExperience/${user.id}`,
                         currentExp, // The data to be sent in the request body
@@ -326,7 +291,7 @@ const ProfilePage = () => {
                         }
                     )
                         .then(response => {
-                            setExperiences([...experiences, currentExp]);
+                            getEx();
                             setShowExpModal(false);
                         })
                         .catch(error => console.error(error));
@@ -413,7 +378,8 @@ const ProfilePage = () => {
                 }
             )
                 .then(response => {
-                    setEducation([...education, currentEdu]);
+                    getEd();
+                    // setEducation([...education, currentEdu]);
                     setShowEduModal(false);
                 })
                 .catch(error => console.error(error));
