@@ -20,8 +20,9 @@ const ProfilePage = () => {
     const token = localStorage.getItem('auth_token');
     const [selectedImage, setSelectedImage] = useState(null); // State for the selected image
     const fileInputRef = useRef(null); // Reference for the hidden file input
-    const [profileId,setProfileId]=useState(null);
     const [profilePicUrl,setProfilePicUrl]=useState(null);
+    const [aboutMe, setAboutMe] = useState('');
+    const [showAboutMeModal, setShowAboutMeModal] = useState(false);
 
 
     useEffect(() => {
@@ -46,9 +47,9 @@ const ProfilePage = () => {
                 .then(response => {
                     setProfile(response.data);
                     console.log(response.data)
-                    const imageUrl = URL.createObjectURL(new Blob([response.data.profilePicture], { type: response.headers['content-type'] }));
-                    setProfilePicUrl(imageUrl);
-                    console.log(imageUrl)
+                    // const imageUrl = URL.createObjectURL(new Blob([response.data.profilePicture], { type: response.headers['content-type'] }));
+                    // setProfilePicUrl(imageUrl);
+                    // console.log(imageUrl)
                 })
                 .catch(error => {
                     console.error("There was an error fetching the profile!", error);
@@ -57,6 +58,7 @@ const ProfilePage = () => {
             axios.get(`http://localhost:8080/user/getExperiences/${user.id}`, { headers: { "Content-Type": "Application/Json", Authorization: `Bearer ${token}` } })
                 .then(response => {
                     setExperiences(response.data);
+                    console.log('experiences:'+response.data)
                 })
                 .catch(error => {
                     console.error("There was an error fetching the experiences!", error);
@@ -78,35 +80,58 @@ const ProfilePage = () => {
                 .catch(error => {
                     console.error("There was an error fetching the posts!", error);
                 });
+
+            axios.get(`http://localhost:8080/user/profilePic/${user.id}`, {
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                },
+                responseType: 'arraybuffer'  // Ensures binary response
+            })
+                .then(response => {
+                    const blob = new Blob([response.data], { type: response.headers['content-type'] });
+                    const imageUrl = URL.createObjectURL(blob);
+                    setProfilePicUrl(imageUrl);
+                })
+                .catch(error => {
+                    console.error("There was an error fetching the profile picture!", error);
+                });
+
+
         }
     }, [user, token]);
 
 
-    // useEffect(() => {
-    //     if(profile){
-    //         const fetchProfilePic = async () => {
-    //             try {
-    //                 const response = await axios.get(`http://localhost:8080/user/profilePic/${profileId}`, {
-    //                     responseType: 'arraybuffer', // Ensure binary data is handled correctly
-    //                     headers: {
-    //                         Authorization: `Bearer ${token}`
-    //                     }
-    //                 });
-    //
-    //                 // Create a URL for the image
-    //                 const imageUrl = URL.createObjectURL(new Blob([response.data], { type: response.headers['content-type'] }));
-    //                 setProfilePicUrl(imageUrl);
-    //                 console.log('image url:'+imageUrl);
-    //             } catch (error) {
-    //                 console.error('Error fetching profile picture:', error);
-    //             }
-    //         };
-    //         fetchProfilePic();
-    //     }
-    //
-    //
-    // }, [profileId]);
+    const handleAboutMeChange = (event) => {
+        setAboutMe(event.target.value);
+    };
 
+    const handleSaveAboutMe = () => {
+        // Send a request to save the about me content
+        axios.put(
+            `http://localhost:8080/user/setSummary/${profile.profile_id}`,
+            { summary: aboutMe },
+            {
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${localStorage.getItem('auth_token')}`
+                }
+            }
+        )
+            .then(response => {
+                console.log("About me saved successfully:", response.data);
+                setShowAboutMeModal(false);
+            })
+            .catch(error => {
+                console.error("Error saving about me:", error);
+            });
+    };
+
+    const handleCloseAboutMeModal = () => {
+        setShowAboutMeModal(false);
+        // Reset about me content if user cancels
+        setAboutMe(profile ? profile.summary || '' : '');
+    };
 
     const handleImageClick = () => {
         fileInputRef.current.click(); // Trigger click on file input
@@ -207,74 +232,179 @@ const ProfilePage = () => {
         }
     };
 
-        const handleSaveExperience = () => {
+    //     const handleSaveExperience = () => {
+    //     if (currentExp.experience_id) {
+    //
+    //         axios.put(
+    //             `http://localhost:8080/user/updateExperience/${user.id}`,
+    //             currentExp, // The data to be sent in the request body
+    //             {
+    //                 headers: {
+    //                     "Content-Type": "application/json",
+    //                     Authorization: `Bearer ${localStorage.getItem('auth_token')}`
+    //                 }
+    //             }
+    //         )
+    //             .then(response => {
+    //                 setExperiences([...experiences, currentExp]);
+    //                 setShowExpModal(false);
+    //             })
+    //             .catch(error => console.error(error));
+    //
+    //     } else {
+    //         console.log(currentExp)
+    //         axios.post(
+    //             `http://localhost:8080/user/addExperience/${user.id}`,
+    //             currentExp, // The data to be sent in the request body
+    //             {
+    //                 headers: {
+    //                     "Content-Type": "application/json",
+    //                     Authorization: `Bearer ${localStorage.getItem('auth_token')}`
+    //                 }
+    //             }
+    //         )
+    //             .then(response => {
+    //                 setExperiences([...experiences, currentExp]);
+    //                 setShowExpModal(false);
+    //             })
+    //             .catch(error => console.error(error));
+    //     }
+    // };
+
+    const handleSaveExperience = () => {
+        console.log(currentExp.experience_id)
         if (currentExp.experience_id) {
-            // axios.put(`http://localhost:8080/experience/${currentExp.experience_id}`,{headers:{
-            //     "content-type":"application/json",Authorization: `Bearer ${localStorage.getItem('auth_token')}`}},
-            //     currentExp)
+            const index = experiences.findIndex(exp => exp.experience_id === currentExp.experience_id);
+            if (index !== -1) {
+                const updatedExperiences = [...experiences];
+                updatedExperiences[index] = currentExp;
+
+                axios.put(
+                    `http://localhost:8080/user/updateExperience/${user.id}`,
+                    currentExp,
+                    {
+                        headers: {
+                            "Content-Type": "application/json",
+                            Authorization: `Bearer ${localStorage.getItem('auth_token')}`
+                        }
+                    }
+                )
+                    .then(response => {
+                        setExperiences(updatedExperiences);
+                        setShowExpModal(false);
+                    })
+                    .catch(error => console.error(error));
+            } else {
+                console.error("Experience with provided ID not found.");
+            }
+        } else {
+            // If education_id doesn't exist, it means we are adding a new education
+            // axios.post(
+            //     `http://localhost:8080/user/addExperience/${user.id}`,
+            //     currentExp,
+            //     {
+            //         headers: {
+            //             "Content-Type": "application/json",
+            //             Authorization: `Bearer ${localStorage.getItem('auth_token')}`
+            //         }
+            //     }
+            // )
             //     .then(response => {
-            //         setExperiences(experiences.map(exp => exp.experience_id === currentExp.experience_id ? response.data : exp));
+            //         setExperiences([...education, currentEdu]);
             //         setShowExpModal(false);
             //     })
             //     .catch(error => console.error(error));
 
-            axios.put(
-                `http://localhost:8080/user/updateExperience/${user.id}`,
-                currentExp, // The data to be sent in the request body
-                {
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${localStorage.getItem('auth_token')}`
-                    }
-                }
-            )
-                .then(response => {
-                    setExperiences([...experiences, response.data]);
-                    setShowExpModal(false);
-                })
-                .catch(error => console.error(error));
+                    axios.post(
+                        `http://localhost:8080/user/addExperience/${user.id}`,
+                        currentExp, // The data to be sent in the request body
+                        {
+                            headers: {
+                                "Content-Type": "application/json",
+                                Authorization: `Bearer ${localStorage.getItem('auth_token')}`
+                            }
+                        }
+                    )
+                        .then(response => {
+                            setExperiences([...experiences, currentExp]);
+                            setShowExpModal(false);
+                        })
+                        .catch(error => console.error(error));
 
-        } else {
-            axios.post(
-                `http://localhost:8080/user/addExperience/${user.id}`,
-                currentExp, // The data to be sent in the request body
-                {
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${localStorage.getItem('auth_token')}`
-                    }
-                }
-            )
-                .then(response => {
-                    setExperiences([...experiences, response.data]);
-                    setShowExpModal(false);
-                })
-                .catch(error => console.error(error));
+
+
         }
     };
+
+    // const handleSaveEducation = () => {
+    //     if (currentEdu.education_id) {
+    //         axios.put(
+    //             `http://localhost:8080/user/updateEdu/${user.id}`,
+    //             currentEdu, // The data to be sent in the request body
+    //             {
+    //                 headers: {
+    //                     "Content-Type": "application/json",
+    //                     Authorization: `Bearer ${localStorage.getItem('auth_token')}`
+    //                 }
+    //             }
+    //         )
+    //             .then(response => {
+    //                 setEducation([...education, currentEdu]);
+    //                 setShowEduModal(false);
+    //             })
+    //             .catch(error => console.error(error));
+    //     } else {
+    //
+    //         axios.post(
+    //             `http://localhost:8080/user/addEducation/${user.id}`,
+    //             currentEdu, // The data to be sent in the request body
+    //             {
+    //                 headers: {
+    //                     "Content-Type": "application/json",
+    //                     Authorization: `Bearer ${localStorage.getItem('auth_token')}`
+    //                 }
+    //             }
+    //         )
+    //             .then(response => {
+    //                 setEducation([...education, currentEdu]);
+    //                 setShowEduModal(false);
+    //             })
+    //             .catch(error => console.error(error));
+    //     }
+    // };
 
     const handleSaveEducation = () => {
         if (currentEdu.education_id) {
-            axios.put(
-                `http://localhost:8080/user/updateEdu/${user.id}`,
-                currentEdu, // The data to be sent in the request body
-                {
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${localStorage.getItem('auth_token')}`
-                    }
-                }
-            )
-                .then(response => {
-                    setEducation([...education, response.data]);
-                    setShowEduModal(false);
-                })
-                .catch(error => console.error(error));
-        } else {
+            // If education_id exists, it means we are updating an existing education
+            const index = education.findIndex(edu => edu.education_id === currentEdu.education_id);
+            if (index !== -1) {
+                // If the education exists in the state array, update it
+                const updatedEducation = [...education];
+                updatedEducation[index] = currentEdu;
 
+                axios.put(
+                    `http://localhost:8080/user/updateEdu/${user.id}`,
+                    currentEdu,
+                    {
+                        headers: {
+                            "Content-Type": "application/json",
+                            Authorization: `Bearer ${localStorage.getItem('auth_token')}`
+                        }
+                    }
+                )
+                    .then(response => {
+                        setEducation(updatedEducation);
+                        setShowEduModal(false);
+                    })
+                    .catch(error => console.error(error));
+            } else {
+                console.error("Education with provided ID not found.");
+            }
+        } else {
+            // If education_id doesn't exist, it means we are adding a new education
             axios.post(
                 `http://localhost:8080/user/addEducation/${user.id}`,
-                currentEdu, // The data to be sent in the request body
+                currentEdu,
                 {
                     headers: {
                         "Content-Type": "application/json",
@@ -283,12 +413,13 @@ const ProfilePage = () => {
                 }
             )
                 .then(response => {
-                    setEducation([...education, response.data]);
+                    setEducation([...education, currentEdu]);
                     setShowEduModal(false);
                 })
                 .catch(error => console.error(error));
         }
     };
+
 
     const handleDeleteExperience = (experience_id) => {
         axios.delete(`http://localhost:8080/user/deleteExperience/${experience_id}`,
@@ -320,14 +451,15 @@ const ProfilePage = () => {
     };
 
     const handleShowExpModal = (exp) => {
-        setCurrentExp(exp || {});
+        setCurrentExp(exp ? { ...exp, start_date: exp.start_date || '', end_date: exp.end_date || '' } : {});
         setShowExpModal(true);
     };
 
     const handleShowEduModal = (edu) => {
-        setCurrentEdu(edu || {});
+        setCurrentEdu(edu ? { ...edu, start_date: edu.start_date || '', end_date: edu.end_date || '' } : {});
         setShowEduModal(true);
     };
+
 
     if (!profile) {
         return <div>Loading...</div>;
@@ -340,16 +472,18 @@ const ProfilePage = () => {
                     <Card>
                         <Card.Body>
                             <Image
-                                src={profilePicUrl.startsWith("blob:") ? profilePicUrl : "https://via.placeholder.com/150"}
+                                src={profilePicUrl ? profilePicUrl : "https://via.placeholder.com/150"}
                                 roundedCircle
                                 className="mb-3"
-                                style={{objectFit: 'cover'}}
+                                style={{
+                                    width: '150px',
+                                    height: '150px',
+                                    objectFit: 'cover'
+                                }}
+                                alt="Profile"
                             />
-                            {/*<Image src={profilePicUrl.replace("blob:","") || "https://via.placeholder.com/150"} roundedCircle className="mb-3" style={{objectFit: 'cover'}}/>*/}
-                            {/*       className="mb-3" style={{objectFit: 'cover'}}/>
-                            {/*<Image src={profile.picture_url || "https://via.placeholder.com/150"} roundedCircle*/}
-                            {/*       className="mb-3" style={{objectFit: 'cover'}}/>*/}
-                            <FontAwesomeIcon icon={faPlusCircle} size="lg" className="ml-2" onClick={handleImageClick}/>
+
+                            <FontAwesomeIcon icon={faPlusCircle} size="lg" className="ml-2" onClick={handleImageClick} style={{cursor:'pointer'}}/>
                             <input
                                 type="file"
                                 accept="image/*"
@@ -366,13 +500,12 @@ const ProfilePage = () => {
                 <Col xs={12} md={8}>
                     <Card>
                         <Card.Body>
-                            <Card.Title>About Me <FontAwesomeIcon icon={faPencilAlt} className="ml-2"
-                                                                  style={{cursor: 'pointer'}}
-                                                                  onClick={() => console.log('Edit About Me')} /></Card.Title>
+                            <Card.Title>About Me <FontAwesomeIcon icon={faPencilAlt} className="ml-2" style={{ cursor: 'pointer' }} onClick={() => setShowAboutMeModal(true)} /></Card.Title>
                             <Card.Text>{profile.summary}</Card.Text>
                         </Card.Body>
                     </Card>
                 </Col>
+
             </Row>
             <Row className="mt-4">
                 <Col xs={12}>
@@ -389,9 +522,6 @@ const ProfilePage = () => {
                                     <p>{exp.company_name}</p>
                                     <p>{exp.location}</p>
                                     <p>{new Date(exp.start_date).toLocaleDateString()} - {new Date(exp.end_date).toLocaleDateString()}</p>
-
-                                    {/*<Button variant="secondary" onClick={() => handleShowExpModal(exp)}>Edit</Button>*/}
-                                    {/*<Button variant="danger" onClick={() => handleDeleteExperience(exp.experience_id)}>Delete</Button>*/}
                                     <hr />
                                 </div>
                             )) : (<div><h5>No experiences added.</h5></div>)}
@@ -414,8 +544,6 @@ const ProfilePage = () => {
                                     </h5>
                                     <p>{edu.school_name}</p>
                                     <p>{new Date(edu.start_date).toLocaleDateString()} - {new Date(edu.end_date).toLocaleDateString()}</p>
-                                    {/*<Button variant="secondary" onClick={() => handleShowEduModal(edu)}>Edit</Button>*/}
-                                    {/*<Button variant="danger" onClick={() => handleDeleteEducation(edu.education_id)}>Delete</Button>*/}
                                     <hr />
                                 </div>
                             )) : (<div><h5>No education added.</h5></div>)}
@@ -523,6 +651,7 @@ const ProfilePage = () => {
                             <Form.Label>End Date</Form.Label>
                             <Form.Control type="date" placeholder="Enter end date" value={currentExp.end_date || ''} onChange={e => setCurrentExp({ ...currentExp, end_date: e.target.value })} />
                         </Form.Group>
+
                     </Form>
                 </Modal.Body>
                 <Modal.Footer>
@@ -561,6 +690,31 @@ const ProfilePage = () => {
                 <Modal.Footer>
                     <Button variant="secondary" onClick={() => setShowEduModal(false)}>Close</Button>
                     <Button variant="primary" onClick={handleSaveEducation}>Save Changes</Button>
+                </Modal.Footer>
+            </Modal>
+
+            {/* About Me Modal */}
+            <Modal show={showAboutMeModal} onHide={handleCloseAboutMeModal}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Edit About Me</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form>
+                        <Form.Group controlId="formAboutMe">
+                            <Form.Label>About Me</Form.Label>
+                            <Form.Control
+                                as="textarea"
+                                rows={5}
+                                value={aboutMe}
+                                onChange={handleAboutMeChange}
+                                placeholder="Enter about me content"
+                            />
+                        </Form.Group>
+                    </Form>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={handleCloseAboutMeModal}>Cancel</Button>
+                    <Button variant="primary" onClick={handleSaveAboutMe}>Save</Button>
                 </Modal.Footer>
             </Modal>
         </Container>

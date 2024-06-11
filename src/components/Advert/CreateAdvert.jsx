@@ -24,17 +24,6 @@ const CreateAdvertPage = () => {
         }));
     };
 
-    // const handleCompanyChange = (e) => {
-    //     const selectedCompanyName = e.target.value;
-    //     const selectedCompany = companies.find(company => company.name === selectedCompanyName);
-    //     console.log(selectedCompany.companyId)
-    //     //if(selectedCompany===null) console.log('null')
-    //     setNewAdvert(prevState => ({
-    //         ...prevState,
-    //         company: selectedCompany ? selectedCompany.companyId : ''
-    //     }));
-    // };
-
     const handleSubmit = async (e) => {
         e.preventDefault();
         console.log(newAdvert);
@@ -85,14 +74,6 @@ const CreateAdvertPage = () => {
                     <Form.Label>Contact Information</Form.Label>
                     <Form.Control type="text" name="contactInformation" value={newAdvert.contactInformation} onChange={handleInputChange} required />
                 </Form.Group>
-                {/*<Form.Group controlId="formCompany">*/}
-                {/*    <Form.Label>Company</Form.Label>*/}
-                {/*    <Form.Control as="select" name="company" onChange={handleCompanyChange} required>*/}
-                {/*        {companies.map((company) => (*/}
-                {/*            <option key={company.companyId} value={company.name}>{company.name}</option>*/}
-                {/*        ))}*/}
-                {/*    </Form.Control>*/}
-                {/*</Form.Group>*/}
                 <Button variant="primary" type="submit">Submit</Button>
             </Form>
         </Container>

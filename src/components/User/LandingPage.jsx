@@ -11,7 +11,6 @@ function LandingPage() {
     const [content, setContent] = useState('');
     const [posts, setPosts] = useState([]);
     const [newComments, setNewComments] = useState({}); // State variable for new comments
-    const { id } = useParams();
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -134,7 +133,7 @@ function LandingPage() {
 
     return (
         <Container className="mt-5">
-            <h2>Welcome to Your App! User ID: {id}</h2>
+            <h2>Welcome to Your App! </h2>
             <p>This is the welcome page after successful login.</p>
             <Button variant="primary" onClick={handleShowModal}>New post</Button>
 

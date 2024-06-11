@@ -27,12 +27,6 @@ function Register() {
 
     const register = async () =>{
 
-        // await axios.post(
-        //     "/register", registerdto,  {
-        //         'Content-Type': 'application/json'
-        //     }
-        // )
-
         await fetch('http://localhost:8080/register', {
             method: 'POST',
             headers: {
@@ -56,18 +50,8 @@ function Register() {
 
     const handleSubmit= (e) => {
         e.preventDefault();
-        // Handle registration logic here
-        // console.log('Registered:', email, password);
         if(password === repeatpassword){
             register();
-                // .then(res=>
-                // {
-                //     handleModalShow("Registration is Complete! Head to the login page to sign in!","Registered successfully!")
-                // }
-            //).catch(
-            //     err=>{
-            //         handleModalShow(err)
-            //     });
         }
         else{
             handleModalShow("Please re-enter both passwords to make sure they match.","Passwords don't match");

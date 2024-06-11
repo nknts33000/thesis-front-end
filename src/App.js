@@ -66,7 +66,7 @@ function Main() {
         <>
             <Navbar bg="light" expand="lg">
                 <Container>
-                    <Navbar.Brand>Your App</Navbar.Brand>
+                    <Navbar.Brand style={{cursor:'pointer'}} onClick={()=>{navigate('/landingPage')}}>Your App</Navbar.Brand>
                     <Navbar.Toggle aria-controls="basic-navbar-nav" />
                     <Navbar.Collapse id="basic-navbar-nav">
                         <Nav className="mr-auto">
@@ -89,16 +89,16 @@ function Main() {
                         <Nav className="justify-content-end nav-icons">
                             {(localStorage.getItem('auth_token') !== null && localStorage.getItem('auth_token') !== 'null') && (
                                 <>
-                                    <div className="icon-container" onClick={toJobSearch} style={{'margin-right':'10px'}}>
-                                        <FontAwesomeIcon icon={faBriefcase} className="icon"/>
+                                    <div className="icon-container" onClick={toJobSearch} style={{'margin-right':'10px',cursor:'pointer'}}>
+                                        <FontAwesomeIcon icon={faBriefcase} className="icon" style={{marginLeft:'7px'}}/>
                                         <div className="icon-label">Jobs</div>
                                     </div>
-                                    <div className="icon-container" onClick={showMessageModal} style={{'margin-right':'10px'}}>
-                                        <FontAwesomeIcon icon={faMessage} className="icon"/>
+                                    <div className="icon-container" onClick={showMessageModal} style={{'margin-right':'10px',cursor:'pointer'}}>
+                                        <FontAwesomeIcon icon={faMessage} className="icon" style={{marginLeft:'25px'}}/>
                                         <div className="icon-label">Messages</div>
                                     </div>
-                                    <div className="icon-container" onClick={handleShowFriendListModal}>
-                                        <FontAwesomeIcon icon={faUserFriends} className="icon"/>
+                                    <div className="icon-container" onClick={handleShowFriendListModal} style={{cursor:'pointer'}}>
+                                        <FontAwesomeIcon icon={faUserFriends} className="icon" style={{marginLeft:'21px'}}/>
                                         <div className="icon-label">Requests</div>
                                     </div>
                                     <div className="icon-container" style={{'margin-top':'21px','margin-left':'15px'}}>
@@ -137,7 +137,7 @@ function Main() {
                         <p>List of messages...</p>
                     </Modal.Body>
                     <Modal.Footer>
-                        <Button variant="secondary" onClick={handleCloseFriendListModal}>Close</Button>
+                        <Button variant="secondary" onClick={closeMessageModal}>Close</Button>
                     </Modal.Footer>
                 </Modal>
             </Navbar>
@@ -147,7 +147,7 @@ function Main() {
                 <Routes>
                     <Route path="/login" element={<Login/>}/>
                     <Route path="/register" element={<Register />} />
-                    <Route path="/user/:id" element={<LandingPage/>} />
+                    <Route path="/landingPage" element={<LandingPage/>} />
                     <Route path="/profile" element={<Profile />} />
                     <Route path="/companies" element={<Companies/>}/>
                     <Route path="/createCompany" element={<CreateCompany/>}/>

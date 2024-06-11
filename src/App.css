@@ -37,27 +37,55 @@
   }
 }
 
+/*.nav-icons {*/
+/*  display: flex;*/
+/*  align-items: center;*/
+/*}*/
+
+/*.nav-icons .icon-container {*/
+/*  margin-right: 20px; !* Add more margin to separate icons *!*/
+/*  text-align: center; !* Center the text *!*/
+/*}*/
+
+/*.nav-icons .icon-container:last-child {*/
+/*  margin-right: 0; !* Remove margin from the last icon *!*/
+/*}*/
+
+/*.nav-icons .icon-container .icon {*/
+/*  cursor: pointer;*/
+/*  margin-right: 5px; !* Add margin to the right of the icon *!*/
+/*}*/
+
+/*.nav-icons .icon-container .icon-label {*/
+/*  font-size: 0.75rem;*/
+/*  color: #333; !* Adjust the color to fit your design *!*/
+/*}*/
+
+.icon-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-right: 10px;
+  cursor: pointer;
+}
+
+.icon-label {
+  margin-top: 5px; /* Adjust as necessary for spacing between icon and label */
+}
+
 .nav-icons {
   display: flex;
   align-items: center;
+  justify-content: center;
 }
 
-.nav-icons .icon-container {
-  margin-right: 20px; /* Add more margin to separate icons */
-  text-align: center; /* Center the text */
-}
-
-.nav-icons .icon-container:last-child {
-  margin-right: 0; /* Remove margin from the last icon */
-}
-
-.nav-icons .icon-container .icon {
-  cursor: pointer;
-  margin-right: 5px; /* Add margin to the right of the icon */
-}
-
-.nav-icons .icon-container .icon-label {
-  font-size: 0.75rem;
-  color: #333; /* Adjust the color to fit your design */
+.custom-caret-toggle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  margin: 0;
 }
 

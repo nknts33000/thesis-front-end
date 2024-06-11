@@ -40,7 +40,7 @@ function Login() {
                     const token = data.token;
                     localStorage.setItem('auth_token', token);
                     localStorage.setItem('user_id',data.id);
-                    navigate(`/user/${data.id}`);
+                    navigate(`/landingPage`);
                 })
                 .catch((err) => {
                     handleModalShow(err.message, "An error has occurred.");
