@@ -23,9 +23,10 @@ import {faMessage, faUserFriends, faCaretDown, faBriefcase} from '@fortawesome/f
 import axios from "axios";
 import Companies from "./components/Company/Companies";
 import Advert from "./components/Advert/Advert";
-import JobSearch from "./components/Advert/JobSearch";
+import JobSearch from "./components/Advert/Search";
 import CreateCompany from "./components/Company/CreateCompany";
 import CreateAdvert from "./components/Advert/CreateAdvert";
+import Search from "./components/Advert/Search";
 
 
 function App() {
@@ -66,7 +67,7 @@ function Main() {
         <>
             <Navbar bg="light" expand="lg">
                 <Container>
-                    <Navbar.Brand style={{cursor:'pointer'}} onClick={()=>{navigate('/landingPage')}}>Your App</Navbar.Brand>
+                    <Navbar.Brand style={{cursor:'pointer'}} onClick={()=>{navigate('/landingPage')}}>JobNet</Navbar.Brand>
                     <Navbar.Toggle aria-controls="basic-navbar-nav" />
                     <Navbar.Collapse id="basic-navbar-nav">
                         <Nav className="mr-auto">
@@ -153,7 +154,7 @@ function Main() {
                     <Route path="/createCompany" element={<CreateCompany/>}/>
                     <Route path="/advert" element={<Advert/>}/>
                     <Route path="/createAdvert" element={<CreateAdvert/>}/>
-                    <Route path="/search" element={<JobSearch/>}/>
+                    <Route path="/search" element={<Search/>}/>
                 </Routes>
             </div>
         </>

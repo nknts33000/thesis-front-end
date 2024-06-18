@@ -301,42 +301,6 @@ const ProfilePage = () => {
         }
     };
 
-    // const handleSaveEducation = () => {
-    //     if (currentEdu.education_id) {
-    //         axios.put(
-    //             `http://localhost:8080/user/updateEdu/${user.id}`,
-    //             currentEdu, // The data to be sent in the request body
-    //             {
-    //                 headers: {
-    //                     "Content-Type": "application/json",
-    //                     Authorization: `Bearer ${localStorage.getItem('auth_token')}`
-    //                 }
-    //             }
-    //         )
-    //             .then(response => {
-    //                 setEducation([...education, currentEdu]);
-    //                 setShowEduModal(false);
-    //             })
-    //             .catch(error => console.error(error));
-    //     } else {
-    //
-    //         axios.post(
-    //             `http://localhost:8080/user/addEducation/${user.id}`,
-    //             currentEdu, // The data to be sent in the request body
-    //             {
-    //                 headers: {
-    //                     "Content-Type": "application/json",
-    //                     Authorization: `Bearer ${localStorage.getItem('auth_token')}`
-    //                 }
-    //             }
-    //         )
-    //             .then(response => {
-    //                 setEducation([...education, currentEdu]);
-    //                 setShowEduModal(false);
-    //             })
-    //             .catch(error => console.error(error));
-    //     }
-    // };
 
     const handleSaveEducation = () => {
         if (currentEdu.education_id) {

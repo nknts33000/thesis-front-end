@@ -1,19 +1,22 @@
 import React, { useState } from 'react';
 import { Container, Form, Button, Card } from 'react-bootstrap';
+import axios from "axios";
 
 const JobSearchPage = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState([]);
-
-    const handleSearch = (e) => {
-        e.preventDefault();
-        // Simulating search results for demonstration
-        const dummyResults = [
-            { id: 1, title: 'Software Engineer', company: 'ABC Tech', location: 'New York, NY' },
-            { id: 2, title: 'Marketing Manager', company: 'XYZ Corp', location: 'San Francisco, CA' },
-            { id: 3, title: 'Data Analyst', company: '123 Inc', location: 'Chicago, IL' },
-        ];
-        setSearchResults(dummyResults);
+    const token=localStorage.getItem('auth_token')
+    const handleSearch = async (event) => {
+        event.preventDefault(); // Prevent the default form submission
+        try {
+            const response = await axios.get(`http://localhost:8080/user/searchAdverts/${searchQuery}`, {
+                headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }
+            });
+            setSearchResults(response.data);
+            console.log(response.data);
+        } catch (error) {
+            console.error("There was an error searching!", error);
+        }
     };
 
     return (
@@ -41,11 +44,12 @@ const JobSearchPage = () => {
             <h2>Search Results</h2>
             <div className="row">
                 {searchResults.map((job) => (
-                    <div key={job.id} className="col-md-4 mb-4">
+                    <div key={job.advertId} className="col-md-4 mb-4">
                         <Card>
                             <Card.Body>
-                                <Card.Title>{job.title}</Card.Title>
+                                <Card.Title>{job.jobTitle}</Card.Title>
                                 <Card.Subtitle className="mb-2 text-muted">{job.company}</Card.Subtitle>
+                                <Card.Text>{job.jobSummary}</Card.Text>
                                 <Card.Text>{job.location}</Card.Text>
                             </Card.Body>
                         </Card>
