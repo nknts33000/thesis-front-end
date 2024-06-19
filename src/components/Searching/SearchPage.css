@@ -1,0 +1,23 @@
+.custom-button {
+    border-radius: 20px; /* Adjusted for rounded appearance */
+    width: 90px; /* Adjusted width */
+    height: 40px; /* Adjusted height */
+    padding: 0; /* Removes default padding */
+    font-size: 14px; /* Adjusts the font size for readability */
+    display: flex; /* Centers text horizontally */
+    align-items: center; /* Centers text vertically */
+    justify-content: center; /* Centers text horizontally */
+    line-height: 1; /* Adjusts line height */
+    text-align: center; /* Ensures text is centered */
+}
+
+.custom-button.outline-primary {
+    border-color: #007bff; /* Border color for outline button */
+    color: #007bff; /* Text color for outline button */
+}
+
+.custom-button.outline-primary:hover,
+.custom-button.outline-primary:focus {
+    background-color: #007bff; /* Hover and focus background for outline button */
+    color: white; /* Text color when hovered or focused */
+}

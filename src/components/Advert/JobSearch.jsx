@@ -46,7 +46,7 @@ const JobSearchPage = () => {
                 {searchResults.map((job) => (
                     <div key={job.advertId} className="col-md-4 mb-4">
                         <Card>
-                            <Card.Body>
+                            <Card.Body style={{cursor:'pointer'}}>
                                 <Card.Title>{job.jobTitle}</Card.Title>
                                 <Card.Subtitle className="mb-2 text-muted">{job.company}</Card.Subtitle>
                                 <Card.Text>{job.jobSummary}</Card.Text>
