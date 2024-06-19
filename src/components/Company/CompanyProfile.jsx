@@ -11,7 +11,7 @@ const CompanyProfile = () => {
     useEffect(() => {
         const fetchCompany = async () => {
             try {
-                const response = await axios.get(`http://localhost:8080/companies/${companyId}`, {
+                const response = await axios.get(`http://localhost:8080/user/getCompany/${companyId}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 setCompany(response.data);
