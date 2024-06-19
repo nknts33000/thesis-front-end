@@ -19,7 +19,7 @@ const CompanyProfile = () => {
                 console.error("There was an error fetching the company data!", error);
             }
         };
-
+//
         fetchCompany();
     }, [companyId, token]);
 
