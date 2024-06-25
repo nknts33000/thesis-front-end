@@ -22,7 +22,7 @@ const SearchPage = () => {
                 headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }
             });
             setSearchResults(response.data);
-
+            console.log(response.data)
         } catch (error) {
             console.error("There was an error searching!", error);
         }
@@ -33,8 +33,9 @@ const SearchPage = () => {
         setSearchQuery('');
     };
 
-    const handleCardClick = (companyId) => {
-        navigate(`/company/${companyId}`);
+    const handleCardClick = (result) => {
+        if(searchType === 'users') navigate(`/user/${result.id}`);
+        else navigate(`/company/${result.companyId}`);
     };
 
     return (
@@ -82,7 +83,7 @@ const SearchPage = () => {
             <div className="row">
                 {searchResults.length > 0 ? (
                     searchResults.map((result, index) => (
-                        <div key={index} className="col-md-4 mb-4" onClick={() => handleCardClick(result.companyId)}>
+                        <div key={index} className="col-md-4 mb-4" onClick={() => handleCardClick(result)}>
                             <Card className="search-card">
                                 <div className="card-image-container"></div>
                                 <Card.Body style={{ cursor: 'pointer' }}>

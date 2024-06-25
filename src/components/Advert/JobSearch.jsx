@@ -7,6 +7,7 @@ const JobSearchPage = () => {
     const [searchResults, setSearchResults] = useState([]);
     const token=localStorage.getItem('auth_token')
     const handleSearch = async (event) => {
+        setSearchResults([]);
         event.preventDefault(); // Prevent the default form submission
         try {
             const response = await axios.get(`http://localhost:8080/user/searchAdverts/${searchQuery}`, {

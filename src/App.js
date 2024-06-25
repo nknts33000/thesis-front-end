@@ -17,7 +17,7 @@ import Register from './components/SignUpIn/Register';
 import Login from './components/SignUpIn/Login';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import LandingPage from "./components/User/LandingPage";
-import Profile from "./components/User/Profile";
+import Profile from "./components/User/MyProfile";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {faMessage, faUserFriends, faCaretDown, faBriefcase, faSearch} from '@fortawesome/free-solid-svg-icons';
 import axios from "axios";
@@ -29,6 +29,8 @@ import CreateAdvert from "./components/Advert/CreateAdvert";
 import Search from "./components/Advert/JobSearch";
 import Searching from "./components/Searching/Searching";
 import CompanyProfile from "./components/Company/CompanyProfile";
+import MyProfile from "./components/User/MyProfile";
+import UserProfile from "./components/User/UserProfile";
 
 
 function App() {
@@ -170,13 +172,14 @@ function Main() {
                     <Route path="/" element={<Login/>}/>
                     <Route path="/register" element={<Register />} />
                     <Route path="/landingPage" element={<LandingPage/>} />
-                    <Route path="/profile" element={<Profile />} />
+                    <Route path="/profile" element={<MyProfile />} />
                     <Route path="/companies" element={<Companies/>}/>
                     <Route path="/createCompany" element={<CreateCompany/>}/>
                     <Route path="/advert" element={<Advert/>}/>
                     <Route path="/createAdvert" element={<CreateAdvert/>}/>
                     <Route path="/search" element={<JobSearch/>}/>
                     <Route path="/searching" element={<Searching/>}/>
+                    <Route path="/user/:id" element={<UserProfile/>} />
                     <Route path="/company/:companyId" element={<CompanyProfile/>} />
                 </Routes>
             </div>
