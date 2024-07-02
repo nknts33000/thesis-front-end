@@ -30,7 +30,6 @@ import Search from "./components/Advert/JobSearch";
 import Searching from "./components/Searching/Searching";
 import CompanyProfile from "./components/Company/CompanyProfile";
 import MyProfile from "./components/User/MyProfile";
-import UserProfile from "./components/User/UserProfile";
 
 
 function App() {
@@ -57,6 +56,12 @@ function Main() {
         navigate('/search')
     }
 
+    const toProf =()=>{
+        const id= localStorage.getItem('user_id');
+        if(id) navigate(`/user/${id}`);
+
+    };
+
     // useEffect(() => {
     //     console.log(localStorage.getItem('auth_token'))
     // }, []);
@@ -64,7 +69,8 @@ function Main() {
     const handleLogout = async () => {
 
         localStorage.removeItem('auth_token');
-        navigate('/');
+        localStorage.removeItem('user_id');
+        navigate('/')
     };
 
     const toSearch = () =>{
@@ -130,7 +136,9 @@ function Main() {
                                             </Dropdown.Toggle>
                                             <Dropdown.Menu className="custom-dropdown-menu">
                                                 <Dropdown.Item
-                                                    onClick={() => navigate('/profile')}>Profile</Dropdown.Item>
+                                                    // onClick={() => navigate('/profile')}
+                                                    onClick={toProf}
+                                                >Profile</Dropdown.Item>
                                                 <Dropdown.Item onClick={() => navigate('/companies')}>My
                                                     Companies</Dropdown.Item>
                                                 <Dropdown.Item onClick={handleLogout}>Logout</Dropdown.Item>
@@ -172,14 +180,14 @@ function Main() {
                     <Route path="/" element={<Login/>}/>
                     <Route path="/register" element={<Register />} />
                     <Route path="/landingPage" element={<LandingPage/>} />
-                    <Route path="/profile" element={<MyProfile />} />
+                    {/*<Route path="/profile" element={<MyProfile />} />*/}
                     <Route path="/companies" element={<Companies/>}/>
                     <Route path="/createCompany" element={<CreateCompany/>}/>
-                    <Route path="/advert" element={<Advert/>}/>
+                    <Route path="/advert/:companyId/:advertId" element={<Advert/>}/>
                     <Route path="/createAdvert" element={<CreateAdvert/>}/>
                     <Route path="/search" element={<JobSearch/>}/>
                     <Route path="/searching" element={<Searching/>}/>
-                    <Route path="/user/:id" element={<UserProfile/>} />
+                    <Route path="/user/:id" element={<MyProfile/>} />
                     <Route path="/company/:companyId" element={<CompanyProfile/>} />
                 </Routes>
             </div>

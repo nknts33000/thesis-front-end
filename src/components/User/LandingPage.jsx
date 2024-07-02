@@ -15,7 +15,7 @@ function LandingPage() {
 
     useEffect(() => {
         if(localStorage.getItem('auth_token') === null || localStorage.getItem('auth_token') === 'null') {
-            navigate('/login');
+            navigate('/');
         }
         const fetchPosts = async () => {
             const token = localStorage.getItem('auth_token');

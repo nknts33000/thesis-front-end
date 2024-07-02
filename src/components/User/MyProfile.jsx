@@ -1,6 +1,6 @@
 import React, {useEffect, useRef, useState} from 'react';
 import { Container, Row, Col, Image, Card, Button, Modal, Form } from 'react-bootstrap';
-import {json, useNavigate} from 'react-router-dom';
+import {json, useNavigate, useParams} from 'react-router-dom';
 import axios from 'axios';
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faComment, faShare, faThumbsUp, faPencilAlt, faTrash, faPlusCircle} from "@fortawesome/free-solid-svg-icons";
@@ -23,14 +23,16 @@ const ProfilePage = () => {
     const [profilePicUrl,setProfilePicUrl]=useState(null);
     const [aboutMe, setAboutMe] = useState('');
     const [showAboutMeModal, setShowAboutMeModal] = useState(false);
-
+    const user_id=localStorage.getItem('user_id');
+    const { id } = useParams();
+    const [connection,setConnection]=useState(null)
 
     useEffect(() => {
         console.log('token:'+token)
         if (token === null || token === 'null') {
             navigate('/login');
         } else {
-            axios.get(`http://localhost:8080/user/getUser/${token}`, { headers:
+            axios.get(`http://localhost:8080/user/findUser/${id}`, { headers:
                     { "Content-Type": "Application/Json", Authorization: `Bearer ${token}` } })
                 .then(response => {
                     setUser(response.data);
@@ -42,7 +44,13 @@ const ProfilePage = () => {
     }, [token,navigate]);
 
     useEffect(() => {
+        // Log connection state on change
+        console.log('Connection state changed:', connection);
+    }, [connection]);
+
+    useEffect(() => {
         if (user) {
+
             axios.get(`http://localhost:8080/user/getProfile/${user.id}`, { headers: { "Content-Type": "Application/Json", Authorization: `Bearer ${token}` } })
                 .then(response => {
                     setProfile(response.data);
@@ -96,6 +104,26 @@ const ProfilePage = () => {
                 .catch(error => {
                     console.error("There was an error fetching the profile picture!", error);
                 });
+
+            if(user_id!==id){
+                axios.get(`http://localhost:8080/user/getConnection/${user_id}/${id}`, {
+                    headers: {
+                        "Authorization": `Bearer ${token}`,
+                        "Content-Type": "application/json"
+                    },
+                })
+                    .then(response => {
+                        setConnection(response.data);
+                        console.log('user_id:', user_id);
+                        console.log('id:', id);
+                        console.log('connection user1 id:',response.data.user1.id);
+                        console.log('connection user2 id:',response.data.user2.id);
+                        //if(connection===null) console.log('null');
+                    })
+                    .catch(error => {
+                        console.error("There was an error fetching the profile picture!", error);
+                    });
+            }
 
 
         }
@@ -390,6 +418,47 @@ const ProfilePage = () => {
         setShowEduModal(true);
     };
 
+    const addFriend = async () =>{
+        axios.post(`http://localhost:8080/user/add_friend/${user_id}/${id}`, {},{ headers: { "Content-Type": "Application/Json", Authorization: `Bearer ${token}` } })
+            .then(response => {
+                setConnection(response.data);
+                console.log(response.data);
+            })
+            .catch(error => {
+                console.error("There was an error initiating the friend request!", error);
+            });
+    };
+
+    const cancelRequest = async () =>{
+        axios.delete(`http://localhost:8080/user/cancel_request/${user_id}/${id}`, { headers: { "Content-Type": "Application/Json", Authorization: `Bearer ${token}` } })
+            .then(response => {
+                setConnection({...connection,connection_status:''});
+            })
+            .catch(error => {
+                console.error("There was an error cancelling the friend request!", error);
+            });
+    };
+
+    const deleteFriend = async () =>{
+        axios.delete(`http://localhost:8080/user/delete_friend/${user_id}/${id}`, { headers: { "Content-Type": "Application/Json", Authorization: `Bearer ${token}` } })
+            .then(response => {
+                setConnection({...connection,connection_status:''});
+            })
+            .catch(error => {
+                console.error("There was an error cancelling the friend request!", error);
+            });
+    };
+
+    const acceptFriendRequest = async () =>{
+        axios.put(`http://localhost:8080/user/accept_friend/${user_id}/${id}`,{}, { headers: { "Content-Type": "Application/Json", Authorization: `Bearer ${token}` } })
+            .then(response => {
+                setConnection(response.data);
+            })
+            .catch(error => {
+                console.error("There was an error cancelling the friend request!", error);
+            });
+    };
+
 
     if (!profile) {
         return <div>Loading...</div>;
@@ -413,15 +482,55 @@ const ProfilePage = () => {
                                 alt="Profile"
                             />
 
-                            <FontAwesomeIcon icon={faPlusCircle} size="lg" className="ml-2" onClick={handleImageClick} style={{cursor:'pointer'}}/>
-                            <input
-                                type="file"
-                                accept="image/*"
-                                ref={fileInputRef}
-                                style={{display: 'none'}}
-                                onChange={handleFileChange}
-                            />
-                            <Card.Title>{user.firstname + " " + user.lastname}</Card.Title>
+                            { user_id===id &&
+                                <>
+                                    <FontAwesomeIcon icon={faPlusCircle} size="lg" className="ml-2" onClick={handleImageClick} style={{cursor:'pointer'}}/>
+                                    <input
+                                    type="file"
+                                    accept="image/*"
+                                    ref={fileInputRef}
+                                    style={{display: 'none'}}
+                                    onChange={handleFileChange}
+                                    />
+                                </>
+                            }
+
+                                <Card.Title style={{marginLeft:"15px"}}>{user.firstname + " " + user.lastname}</Card.Title>
+                            {/*{ user_id!==id &&*/}
+                            {/*    <Button variant="primary" type="submit"  style={{marginLeft:'15px'}}>*/}
+                            {/*        Add Friend*/}
+                            {/*    </Button>*/}
+                            {/*}*/}
+
+                            {user_id !== id && connection && (
+                                // connection.connection_status === 'no_connection' ? (
+                                //     <Button variant="primary" type="submit" style={{ marginLeft: '15px' }}>
+                                //         Add Friend
+                                //     </Button>
+                                // ) :
+                                    connection.connection_status === 'Pending' ? (
+                                        connection.user1.id==user_id // == because they're not of the same type. one is string another is long/bigint
+                                            ?(
+                                            <Button variant="secondary" style={{ marginLeft: '15px' }} onClick={cancelRequest}>
+                                                Cancel Friend Request
+                                            </Button>
+                                        ) :(
+                                            <Button variant="secondary" style={{ marginLeft: '15px' }} onClick={acceptFriendRequest}>
+                                                Accept Friend Request
+                                            </Button>
+                                        )
+
+                                ) : connection.connection_status === 'Friends' ? (
+                                    <Button variant="success" style={{ marginLeft: '15px' }} onClick={deleteFriend}>
+                                        Delete Friend
+                                    </Button>
+                                ) :(
+                                    <Button variant="primary" type="submit" style={{ marginLeft: '15px' }} onClick={addFriend}>
+                                        Add Friend
+                                    </Button>
+                                )
+                            ) }
+
                             <Card.Text>{profile.headline}</Card.Text>
                             <Card.Text><small className="text-muted">{profile.industry}</small></Card.Text>
                         </Card.Body>
@@ -430,7 +539,12 @@ const ProfilePage = () => {
                 <Col xs={12} md={8}>
                     <Card>
                         <Card.Body>
-                            <Card.Title>About Me <FontAwesomeIcon icon={faPencilAlt} className="ml-2" style={{ cursor: 'pointer' }} onClick={() => setShowAboutMeModal(true)} /></Card.Title>
+                            <Card.Title>About Me
+
+                                {user_id===id &&
+                                    <FontAwesomeIcon icon={faPencilAlt} className="ml-2" style={{ cursor: 'pointer' }} onClick={() => setShowAboutMeModal(true)} />
+                                }
+                            </Card.Title>
                             <Card.Text>{profile.summary}</Card.Text>
                         </Card.Body>
                     </Card>
@@ -442,7 +556,9 @@ const ProfilePage = () => {
                     <Card>
                         <Card.Body>
                             <Card.Title>Experience</Card.Title>
-                            <Button onClick={() => handleShowExpModal()}>Add Experience</Button>
+                            { user_id===id &&
+                                <Button onClick={() => handleShowExpModal()}>Add Experience</Button>
+                            }
                             {experiences.length > 0 ? experiences.map(exp => (
                                 <div key={exp.experience_id}>
                                     <h5>{exp.title}
@@ -464,7 +580,9 @@ const ProfilePage = () => {
                     <Card>
                         <Card.Body>
                             <Card.Title>Education</Card.Title>
-                            <Button onClick={() => handleShowEduModal()}>Add Education</Button>
+                            {user_id===id &&
+                                <Button onClick={() => handleShowEduModal()}>Add Education</Button>
+                            }
                             {education.length > 0 ? education.map(edu => (
                                 <div key={edu.education_id}>
                                     <h5>

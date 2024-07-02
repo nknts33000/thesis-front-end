@@ -1,4 +1,4 @@
-// Register.js
+ // Register.js
 //import axios from 'axios';
 import React, { useState } from 'react';
 import { Container, Form, Button, Row, Col,Modal } from 'react-bootstrap';
