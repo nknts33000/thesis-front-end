@@ -12,19 +12,36 @@ const CompanyProfilePage = () => {
     const [showPostModal, setShowPostModal] = useState(false);
     const [currentPost, setCurrentPost] = useState(null);
     const { companyId } = useParams();
+    const user_id=localStorage.getItem('user_id');
     const token = localStorage.getItem('auth_token');
     const fileInputRef = useRef(null); // Reference for the hidden file input
     const [selectedImage, setSelectedImage] = useState(null); // State for the selected image
     const [logo, setLogo] = useState(null);
     const [selectedTab, setSelectedTab] = useState("posts"); // State for the selected tab
     const navigate = useNavigate();
+    const [isAdmin,setIsAdmin]=useState(false);
 
     useEffect(() => {
         fetchCompanyData();
         fetchCompanyPosts();
         //fetchCompanyJobs();
         fetchCompanyLogo();
+        fetchAdminData();
     }, []);
+
+    const fetchAdminData = async ()=>{
+        try {
+            const response = await axios.get(`http://localhost:8080/user/isAdmin/${user_id}/${companyId}`, {
+                headers: {
+                    "Content-Type": "Application/Json",
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            setIsAdmin(response.data);
+        } catch (error) {
+            console.error("Error fetching admin data", error);
+        }
+    };
 
     const fetchCompanyData = async () => {
         try {
@@ -180,9 +197,12 @@ const CompanyProfilePage = () => {
                         src={logo || 'placeholder.jpg'}
                         roundedCircle
                         style={{ width: '150px', height: '150px', objectFit: 'cover', cursor: 'pointer' }}
-                        onClick={handleImageClick}
+
+                            // onClick={handleImageClick}
                     />
-                    <FontAwesomeIcon icon={faPlusCircle} size="lg" className="ml-2" onClick={handleImageClick} style={{ cursor: 'pointer' }} />
+                    {isAdmin &&
+                        <FontAwesomeIcon icon={faPlusCircle} size="lg" className="ml-2" onClick={handleImageClick} style={{ cursor: 'pointer' }} />
+                    }
                     <input
                         type="file"
                         accept="image/*"
@@ -213,55 +233,58 @@ const CompanyProfilePage = () => {
                     {selectedTab === "posts" && (
 
 
-                                    <>
-                                    <Button variant="primary" onClick={handleAddPost}>
-                                        Add Post
-                                        {/*<FontAwesomeIcon icon={faPlusCircle} />*/}
-                                    </Button>
-
-                                {posts.map((post, index) => (
-                                    <Card key={index} className="mb-2">
-                                        <Card.Body>
-                                            <Card.Title>{post.title}</Card.Title>
-                                            <Card.Text>{post.content}</Card.Text>
-                                            <Button variant="link" onClick={() => handleEditPost(post)}>
-                                                <FontAwesomeIcon icon={faPencilAlt} />
+                                <>
+                                    {isAdmin &&
+                                            <Button variant="primary" onClick={handleAddPost}>
+                                                Add Post
+                                                {/*<FontAwesomeIcon icon={faPlusCircle} />*/}
                                             </Button>
-                                            <Button variant="link" onClick={() => handleDeletePost(post.postId)}>
-                                                <FontAwesomeIcon icon={faTrash} />
-                                            </Button>
-                                            <Button variant="link">
-                                                <FontAwesomeIcon icon={faThumbsUp} />
-                                            </Button>
-                                            <Button variant="link">
-                                                <FontAwesomeIcon icon={faComment} />
-                                            </Button>
-                                            <Button variant="link">
-                                                <FontAwesomeIcon icon={faShare} />
-                                            </Button>
-                                        </Card.Body>
-                                    </Card>
-                                ))}
+                                        }
+                                    {posts.map((post, index) => (
+                                        <Card key={index} className="mb-2">
+                                            <Card.Body>
+                                                <Card.Title>{post.title}</Card.Title>
+                                                <Card.Text>{post.content}</Card.Text>
+                                                <Button variant="link" onClick={() => handleEditPost(post)}>
+                                                    <FontAwesomeIcon icon={faPencilAlt} />
+                                                </Button>
+                                                <Button variant="link" onClick={() => handleDeletePost(post.postId)}>
+                                                    <FontAwesomeIcon icon={faTrash} />
+                                                </Button>
+                                                <Button variant="link">
+                                                    <FontAwesomeIcon icon={faThumbsUp} />
+                                                </Button>
+                                                <Button variant="link">
+                                                    <FontAwesomeIcon icon={faComment} />
+                                                </Button>
+                                                <Button variant="link">
+                                                    <FontAwesomeIcon icon={faShare} />
+                                                </Button>
+                                            </Card.Body>
+                                        </Card>
+                                    ))}
                                 </>
 
                     )}
                     {selectedTab === "jobs" && (
                         <>
-                        <Button variant="primary" onClick={handleAddJob} style={{marginBottom: '10px'}}>
-                            Add Job
-                            {/*<FontAwesomeIcon icon={faPlusCircle} />*/}
-                        </Button>
-                             {company.adverts.map((job, index) => (
-                                    <Card key={index} className="mb-2" style={{cursor:'pointer'}} >
-                                        <Card.Body onClick={()=>toJobPage(job.advertId)}>
-                                            <Card.Title>{job.jobTitle}</Card.Title>
-                                            {/*<Card.Text>{job.jobSummary}</Card.Text>*/}
-                                            <Card.Text><strong>Location:</strong> {job.location}</Card.Text>
-                                            <Card.Text><strong>Contact information:</strong> {job.contactInformation}</Card.Text>
-                                            {/* Add any other job details you want to display here */}
-                                        </Card.Body>
-                                    </Card>
-                                ))}
+                                { isAdmin &&
+                                    <Button variant="primary" onClick={handleAddJob} style={{marginBottom: '10px'}}>
+                                        Add Job
+                                        {/*<FontAwesomeIcon icon={faPlusCircle} />*/}
+                                    </Button>
+                                }
+                                 {company.adverts.map((job, index) => (
+                                        <Card key={index} className="mb-2" style={{cursor:'pointer'}} >
+                                            <Card.Body onClick={()=>toJobPage(job.advertId)}>
+                                                <Card.Title>{job.jobTitle}</Card.Title>
+                                                {/*<Card.Text>{job.jobSummary}</Card.Text>*/}
+                                                <Card.Text><strong>Location:</strong> {job.location}</Card.Text>
+                                                <Card.Text><strong>Contact information:</strong> {job.contactInformation}</Card.Text>
+                                                {/* Add any other job details you want to display here */}
+                                            </Card.Body>
+                                        </Card>
+                                    ))}
                         </>
                     )}
                 </Col>

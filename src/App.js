@@ -30,6 +30,7 @@ import Search from "./components/Advert/JobSearch";
 import Searching from "./components/Searching/Searching";
 import CompanyProfile from "./components/Company/CompanyProfile";
 import MyProfile from "./components/User/MyProfile";
+import ApplicantsPage from "./components/Advert/Applicants";
 
 
 function App() {
@@ -79,7 +80,7 @@ function Main() {
 
     return (
         <>
-            <Navbar bg="light" expand="lg">
+            <Navbar bg="primary" expand="lg">
                 <Container>
                     <Navbar.Brand style={{cursor:'pointer'}} onClick={()=>{navigate('/landingPage')}}>JobNet</Navbar.Brand>
                     <Navbar.Toggle aria-controls="basic-navbar-nav" />
@@ -91,11 +92,11 @@ function Main() {
                                 localStorage.getItem('auth_token')!=='null')
                                 ? (
                                 <>
-                                    <Button onClick={handleLogout} variant="outline-primary">Logout</Button>
+                                    <Button onClick={handleLogout} variant="outline-light">Logout</Button>
 
                                 </>
                             ) : (
-                                <><Button href="/register" variant="outline-primary">Register</Button> <Button href="/" variant="outline-primary">Login</Button></>
+                                <><Button href="/register" variant="outline-light">Register</Button> <Button href="/" variant="outline-light">Login</Button></>
                             )}
                         </Nav>
 
@@ -189,6 +190,7 @@ function Main() {
                     <Route path="/searching" element={<Searching/>}/>
                     <Route path="/user/:id" element={<MyProfile/>} />
                     <Route path="/company/:companyId" element={<CompanyProfile/>} />
+                    <Route path="/applicants/:advertId" element={<ApplicantsPage />} />
                 </Routes>
             </div>
         </>

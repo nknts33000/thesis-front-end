@@ -1,0 +1,25 @@
+/* custom-styles.css */
+.list-group-container {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+}
+
+.left-column, .right-column {
+    padding: 10px; /* Adjust padding as needed */
+}
+
+.left-column {
+    flex: 1;
+}
+
+.separator {
+    width: 1px;
+    background-color: #ddd; /* Adjust the color and thickness as needed */
+    height: auto; /* Makes the separator fill the height of the container */
+    margin: 0 15px; /* Adjust the margin to fit your layout */
+}
+
+.right-column {
+    flex: 1;
+}

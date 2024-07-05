@@ -26,6 +26,8 @@ const ProfilePage = () => {
     const user_id=localStorage.getItem('user_id');
     const { id } = useParams();
     const [connection,setConnection]=useState(null)
+    const [showModal,setShowModal]=useState(false);
+    const [content, setContent] = useState('');
 
     useEffect(() => {
         console.log('token:'+token)
@@ -51,17 +53,7 @@ const ProfilePage = () => {
     useEffect(() => {
         if (user) {
 
-            axios.get(`http://localhost:8080/user/getProfile/${user.id}`, { headers: { "Content-Type": "Application/Json", Authorization: `Bearer ${token}` } })
-                .then(response => {
-                    setProfile(response.data);
-                    console.log(response.data)
-                    // const imageUrl = URL.createObjectURL(new Blob([response.data.profilePicture], { type: response.headers['content-type'] }));
-                    // setProfilePicUrl(imageUrl);
-                    // console.log(imageUrl)
-                })
-                .catch(error => {
-                    console.error("There was an error fetching the profile!", error);
-                });
+            getProfile();
 
             axios.get(`http://localhost:8080/user/getExperiences/${user.id}`, { headers: { "Content-Type": "Application/Json", Authorization: `Bearer ${token}` } })
                 .then(response => {
@@ -80,30 +72,9 @@ const ProfilePage = () => {
                     console.error("There was an error fetching the education!", error);
                 });
 
-            axios.get(`http://localhost:8080/user/getPosts/${user.id}`, { headers: { "Content-Type": "Application/Json", Authorization: `Bearer ${token}` } })
-                .then(response => {
-                    setPosts(response.data);
-                    console.log(response.data)
-        })
-                .catch(error => {
-                    console.error("There was an error fetching the posts!", error);
-                });
+            getPosts();
 
-            axios.get(`http://localhost:8080/user/profilePic/${user.id}`, {
-                headers: {
-                    "Authorization": `Bearer ${token}`,
-                    "Content-Type": "application/json"
-                },
-                responseType: 'arraybuffer'  // Ensures binary response
-            })
-                .then(response => {
-                    const blob = new Blob([response.data], { type: response.headers['content-type'] });
-                    const imageUrl = URL.createObjectURL(blob);
-                    setProfilePicUrl(imageUrl);
-                })
-                .catch(error => {
-                    console.error("There was an error fetching the profile picture!", error);
-                });
+            getProfPic();
 
             if(user_id!==id){
                 axios.get(`http://localhost:8080/user/getConnection/${user_id}/${id}`, {
@@ -129,6 +100,48 @@ const ProfilePage = () => {
         }
     }, [user, token]);
 
+    const getPosts=async ()=>{
+        axios.get(`http://localhost:8080/user/getPosts/${user.id}`, { headers: { "Content-Type": "Application/Json", Authorization: `Bearer ${token}` } })
+            .then(response => {
+                setPosts(response.data);
+                console.log(response.data)
+            })
+            .catch(error => {
+                console.error("There was an error fetching the posts!", error);
+            });
+    };
+
+    const getProfile =async ()=>{
+        axios.get(`http://localhost:8080/user/getProfile/${user.id}`, { headers: { "Content-Type": "Application/Json", Authorization: `Bearer ${token}` } })
+            .then(response => {
+                setProfile(response.data);
+                console.log(response.data)
+                // const imageUrl = URL.createObjectURL(new Blob([response.data.profilePicture], { type: response.headers['content-type'] }));
+                // setProfilePicUrl(imageUrl);
+                // console.log(imageUrl)
+            })
+            .catch(error => {
+                console.error("There was an error fetching the profile!", error);
+            });
+    };
+
+    const getProfPic =async ()=>{
+        axios.get(`http://localhost:8080/user/profilePic/${user.id}`, {
+            headers: {
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json"
+            },
+            responseType: 'arraybuffer'  // Ensures binary response
+        })
+            .then(response => {
+                const blob = new Blob([response.data], { type: response.headers['content-type'] });
+                const imageUrl = URL.createObjectURL(blob);
+                setProfilePicUrl(imageUrl);
+            })
+            .catch(error => {
+                console.error("There was an error fetching the profile picture!", error);
+            });
+    };
 
     const getEd = async () => {
         axios.get(`http://localhost:8080/user/getEducation/${user.id}`, { headers: { "Content-Type": "Application/Json", Authorization: `Bearer ${token}` } })
@@ -170,6 +183,7 @@ const ProfilePage = () => {
             .then(response => {
                 console.log("About me saved successfully:", response.data);
                 setShowAboutMeModal(false);
+                getProfile();
             })
             .catch(error => {
                 console.error("Error saving about me:", error);
@@ -210,6 +224,7 @@ const ProfilePage = () => {
                     console.log('Image uploaded successfully:', response.data);
                     // Optionally, update the profile with the new image URL
                     setProfile(prev => ({ ...prev, picture_url: response.data.picture_url }));
+                    getProfPic();
                 })
                 .catch(error => {
                     console.error('Error uploading image:', error);
@@ -279,6 +294,8 @@ const ProfilePage = () => {
         } catch (error) {
             console.error("Error submitting comment:", error);
         }
+
+        getPosts();
     };
 
     const handleSaveExperience = () => {
@@ -459,6 +476,41 @@ const ProfilePage = () => {
             });
     };
 
+    const handleShowModal = () => setShowModal(true);
+    const handleCloseModal = () => setShowModal(false);
+
+    const handlePostSubmit = async () => {
+        const token = localStorage.getItem('auth_token');
+        const headers = {
+            'Content-type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        };
+
+        const body = { "content":content, "token":token };
+        const url = 'http://localhost:8080/user/post';
+        await fetch(url, {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify(body)
+        }).then(()=>{
+            getPosts();
+        }).catch((err) => {
+            console.log(err);
+        });
+        handleCloseModal();
+    };
+
+    const rejectFriendRequest =async ()=>{
+        axios.delete(`http://localhost:8080/user/reject_friend/${user_id}/${id}`, { headers: { "Content-Type": "Application/Json", Authorization: `Bearer ${token}` } })
+            .then(response => {
+                setConnection({...connection,connection_status:''});
+            })
+            .catch(error => {
+                console.error("There was an error rejecting the friend request!", error);
+            });
+    };
+
+
 
     if (!profile) {
         return <div>Loading...</div>;
@@ -515,9 +567,14 @@ const ProfilePage = () => {
                                                 Cancel Friend Request
                                             </Button>
                                         ) :(
-                                            <Button variant="secondary" style={{ marginLeft: '15px' }} onClick={acceptFriendRequest}>
-                                                Accept Friend Request
-                                            </Button>
+                                            <>
+                                                <Button variant="secondary" style={{ marginLeft: '15px' }} onClick={acceptFriendRequest}>
+                                                    Accept Friend Request
+                                                </Button>
+                                                <Button variant="secondary" style={{ marginLeft: '15px' }} onClick={rejectFriendRequest}>
+                                                    Reject Friend Request
+                                                </Button>
+                                            </>
                                         )
 
                                 ) : connection.connection_status === 'Friends' ? (
@@ -599,6 +656,13 @@ const ProfilePage = () => {
                     </Card>
                 </Col>
             </Row>
+
+            <hr/>
+
+
+            {user_id===id &&
+                <Button variant="primary" onClick={handleShowModal}>New post</Button>
+            }
 
             <Row className="mt-4">
                 <Col xs={12}>
@@ -765,6 +829,31 @@ const ProfilePage = () => {
                     <Button variant="primary" onClick={handleSaveAboutMe}>Save</Button>
                 </Modal.Footer>
             </Modal>
+
+
+            <Modal show={showModal} onHide={handleCloseModal}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Add New Post</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form>
+                        <Form.Group controlId="postContent">
+                            <Form.Label>Post Content</Form.Label>
+                            <Form.Control
+                                as="textarea"
+                                rows={3}
+                                value={content}
+                                onChange={(e) => setContent(e.target.value)}
+                            />
+                        </Form.Group>
+                    </Form>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={handleCloseModal}>Close</Button>
+                    <Button variant="primary" onClick={handlePostSubmit}>Add post</Button>
+                </Modal.Footer>
+            </Modal>
+
         </Container>
     );
 };

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Container, Card, Image, Button, Form } from 'react-bootstrap';
-import { useParams } from "react-router-dom";
+import {useNavigate, useParams} from "react-router-dom";
 import axios from "axios";
 
 const JobAdvertisementPage = () => {
@@ -11,6 +11,8 @@ const JobAdvertisementPage = () => {
     const token = localStorage.getItem('auth_token');
     const [owner,setOwner]=useState(null);
     const  user_id=localStorage.getItem('user_id');
+    const [applied,setApplied]=useState(false);
+    const navigate=useNavigate();
 
     useEffect(() => {
         const fetchJob = async () => {
@@ -71,11 +73,29 @@ const JobAdvertisementPage = () => {
             }
         };
 
+
+
+        hasApplied();
         getCompany();
         fetchJob();
         fetchCompanyLogo();
         fetchOwner();
     }, [advertId, companyId, token]);
+
+    const hasApplied =async ()=>{
+        try {
+            const response = await axios.get(`http://localhost:8080/user/hasSubmittedResume/${advertId}/${user_id}`, {
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            setApplied(response.data)
+            console.log('applied:'+response.data)
+        } catch (error) {
+            console.error("There was an error fetching the owner!", error);
+        }
+    };
 
     const handleResumeSubmit = async (e) => {
         e.preventDefault();
@@ -89,6 +109,7 @@ const JobAdvertisementPage = () => {
                     Authorization: `Bearer ${token}`
                 }
             });
+            hasApplied();
             alert('Resume submitted successfully!');
         } catch (error) {
             console.error("There was an error submitting the resume!", error);
@@ -138,21 +159,28 @@ const JobAdvertisementPage = () => {
             {
                 owner && (
                         owner.id==user_id?(
-                                        <Button variant="primary" type="submit">
+                                        <Button variant="primary" type="submit" onClick={()=>{navigate(`/applicants/${advertId}`)}}>
                                             View applicants
                                         </Button>
                             ):(
-                                <>
-                                    <Form onSubmit={handleResumeSubmit}>
-                                        <Form.Group controlId="formFile" className="mb-3">
-                                            <Form.Label>Submit Your Resume</Form.Label>
-                                            <Form.Control type="file" name="resume" accept=".pdf" required />
-                                        </Form.Group>
-                                        <Button variant="primary" type="submit">
-                                            Submit Resume
-                                        </Button>
-                                    </Form>
-                                </>
+
+                                applied===false?(
+                                    <>
+                                        <Form onSubmit={handleResumeSubmit}>
+                                            <Form.Group controlId="formFile" className="mb-3">
+                                                <Form.Label>Submit Your Resume</Form.Label>
+                                                <Form.Control type="file" name="resume" accept=".pdf" required />
+                                            </Form.Group>
+                                            <Button variant="primary" type="submit">
+                                                Submit Resume
+                                            </Button>
+                                        </Form>
+                                    </>
+                                ):(
+                                    <Button variant="primary" type="submit" disabled>
+                                        You have already applied
+                                    </Button>
+                                )
                             )
                 )
             }

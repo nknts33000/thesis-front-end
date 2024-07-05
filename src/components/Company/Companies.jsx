@@ -43,15 +43,20 @@ const CompaniesPage = () => {
 
     return (
         <>
-            <Button variant="primary" onClick={newComp} style={{ marginTop: '20px', marginBottom: '80px' }}>New Company</Button>
+            <Button variant="primary" onClick={newComp} style={{marginTop: '40px',marginBottom:'15px'}}>New
+                Company</Button>
+            <h2><strong>My companies</strong></h2>
+            <hr/>
             {companies.length > 0 ? (
                 companies.map((company) => (
                     <Container key={company.companyId}>
                         <Row className="mb-3">
                             <Col xs={12} md={10}>
-                                <img src={company.companyLogo} alt="Company Logo" />
+                                {/*<img src={company.companyLogo} alt="Company Logo" />*/}
                                 <h1 className="company-name">{company.name}</h1>
-                                <Button variant="primary" onClick={()=>{navigate(`/company/${company.companyId}`)}}>Go to page</Button>
+                                <Button variant="primary" onClick={() => {
+                                    navigate(`/company/${company.companyId}`)
+                                }}>Go to page</Button>
                             </Col>
                         </Row>
 
