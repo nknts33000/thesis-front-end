@@ -4,6 +4,7 @@ import {json, useNavigate, useParams} from 'react-router-dom';
 import axios from 'axios';
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faComment, faShare, faThumbsUp, faPencilAlt, faTrash, faPlusCircle} from "@fortawesome/free-solid-svg-icons";
+import ChatBox from "../Messages/ChatBox";
 
 const ProfilePage = () => {
     const navigate = useNavigate();
@@ -28,6 +29,8 @@ const ProfilePage = () => {
     const [connection,setConnection]=useState(null)
     const [showModal,setShowModal]=useState(false);
     const [content, setContent] = useState('');
+    const [isChatOpen, setIsChatOpen] = useState(false);
+
 
     useEffect(() => {
         console.log('token:'+token)
@@ -99,6 +102,10 @@ const ProfilePage = () => {
 
         }
     }, [user, token]);
+
+    const toggleChatBox = () => {
+        setIsChatOpen(!isChatOpen);
+    };
 
     const getPosts=async ()=>{
         axios.get(`http://localhost:8080/user/getPosts/${user.id}`, { headers: { "Content-Type": "Application/Json", Authorization: `Bearer ${token}` } })
@@ -547,6 +554,16 @@ const ProfilePage = () => {
                                 </>
                             }
 
+                            {
+                                user_id!==id &&
+
+                                <>
+                                    <Button variant="success" onClick={toggleChatBox} style={{ marginLeft: '10px' }}>
+                                        Chat
+                                    </Button>
+                                </>
+                            }
+
                                 <Card.Title style={{marginLeft:"15px"}}>{user.firstname + " " + user.lastname}</Card.Title>
                             {/*{ user_id!==id &&*/}
                             {/*    <Button variant="primary" type="submit"  style={{marginLeft:'15px'}}>*/}
@@ -732,6 +749,10 @@ const ProfilePage = () => {
                     )}
                 </Col>
             </Row>
+
+
+            {/* ChatBox Component */}
+            <ChatBox show={isChatOpen} handleClose={toggleChatBox} id={id} user_id={user_id}/>
 
 
             <Modal show={showExpModal} onHide={() => setShowExpModal(false)}>

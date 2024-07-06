@@ -31,7 +31,9 @@ import Searching from "./components/Searching/Searching";
 import CompanyProfile from "./components/Company/CompanyProfile";
 import MyProfile from "./components/User/MyProfile";
 import ApplicantsPage from "./components/Advert/Applicants";
-
+import ChatBox from "./components/Messages/ChatBox";
+// import MessagesModal from './components/Messages/MessagesModal';
+import './components/Messages/Chatbox.css';
 
 function App() {
     return (
@@ -48,10 +50,26 @@ function Main() {
 
     const[messageModal,setMessageModal]=useState(false);
 
+    const [showModal, setShowModal] = useState(false);
+
+    const handleOpenModal = () => setShowModal(true);
+    const handleCloseModal = () => setShowModal(false);
+
     const handleShowFriendListModal = () => setFriendListModal(true);
     const handleCloseFriendListModal = () => setFriendListModal(false);
     const showMessageModal = () => setMessageModal(true);
     const closeMessageModal = () => setMessageModal(false);
+
+
+
+    const [isChatOpen, setIsChatOpen] = useState(false);
+
+    const toggleChatBox = () => {
+        setIsChatOpen(!isChatOpen);
+    };
+
+
+
 
     const toJobSearch = () => {
         navigate('/search')
@@ -80,24 +98,28 @@ function Main() {
 
     return (
         <>
+
             <Navbar bg="primary" expand="lg">
                 <Container>
-                    <Navbar.Brand style={{cursor:'pointer'}} onClick={()=>{navigate('/landingPage')}}>JobNet</Navbar.Brand>
-                    <Navbar.Toggle aria-controls="basic-navbar-nav" />
+                    <Navbar.Brand style={{cursor: 'pointer'}} onClick={() => {
+                        navigate('/landingPage')
+                    }}>JobNet</Navbar.Brand>
+                    <Navbar.Toggle aria-controls="basic-navbar-nav"/>
                     <Navbar.Collapse id="basic-navbar-nav">
                         <Nav className="mr-auto">
 
-                            {(localStorage.getItem('auth_token') !==null
+                            {(localStorage.getItem('auth_token') !== null
                                 &&
-                                localStorage.getItem('auth_token')!=='null')
+                                localStorage.getItem('auth_token') !== 'null')
                                 ? (
-                                <>
-                                    <Button onClick={handleLogout} variant="outline-light">Logout</Button>
+                                    <>
+                                        <Button onClick={handleLogout} variant="outline-light">Logout</Button>
 
-                                </>
-                            ) : (
-                                <><Button href="/register" variant="outline-light">Register</Button> <Button href="/" variant="outline-light">Login</Button></>
-                            )}
+                                    </>
+                                ) : (
+                                    <><Button href="/register" variant="outline-light">Register</Button> <Button
+                                        href="/" variant="outline-light">Login</Button></>
+                                )}
                         </Nav>
 
                     </Navbar.Collapse>
@@ -117,11 +139,23 @@ function Main() {
                                                          style={{marginLeft: '7px'}}/>
                                         <div className="icon-label">Jobs</div>
                                     </div>
-                                    <div className="icon-container" onClick={showMessageModal}
+                                    <div className="icon-container" onClick={handleOpenModal}
                                          style={{'margin-right': '10px', cursor: 'pointer'}}>
                                         <FontAwesomeIcon icon={faMessage} className="icon"
                                                          style={{marginLeft: '25px'}}/>
                                         <div className="icon-label">Messages</div>
+                                        {/*<MessagesModal*/}
+                                        {/*    senderId={1}*/}
+                                        {/*    receiverId={2}*/}
+                                        {/*    show={showModal}*/}
+                                        {/*    handleClose={handleCloseModal}*/}
+                                        {/*/>*/}
+                                        {/*<MessagesModal*/}
+                                        {/*    senderId={1}*/}
+                                        {/*    receiverId={2}*/}
+                                        {/*    show={showModal}*/}
+                                        {/*    handleClose={handleCloseModal}*/}
+                                        {/*/>*/}
                                     </div>
                                     <div className="icon-container" onClick={handleShowFriendListModal}
                                          style={{cursor: 'pointer'}}>
@@ -179,8 +213,8 @@ function Main() {
 
                 <Routes>
                     <Route path="/" element={<Login/>}/>
-                    <Route path="/register" element={<Register />} />
-                    <Route path="/landingPage" element={<LandingPage/>} />
+                    <Route path="/register" element={<Register/>}/>
+                    <Route path="/landingPage" element={<LandingPage/>}/>
                     {/*<Route path="/profile" element={<MyProfile />} />*/}
                     <Route path="/companies" element={<Companies/>}/>
                     <Route path="/createCompany" element={<CreateCompany/>}/>
@@ -188,13 +222,14 @@ function Main() {
                     <Route path="/createAdvert" element={<CreateAdvert/>}/>
                     <Route path="/search" element={<JobSearch/>}/>
                     <Route path="/searching" element={<Searching/>}/>
-                    <Route path="/user/:id" element={<MyProfile/>} />
-                    <Route path="/company/:companyId" element={<CompanyProfile/>} />
-                    <Route path="/applicants/:advertId" element={<ApplicantsPage />} />
+                    <Route path="/user/:id" element={<MyProfile/>}/>
+                    <Route path="/company/:companyId" element={<CompanyProfile/>}/>
+                    <Route path="/applicants/:advertId" element={<ApplicantsPage/>}/>
                 </Routes>
             </div>
         </>
     );
 }
+
 
 export default App;
