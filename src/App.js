@@ -61,8 +61,23 @@ function Main() {
     const closeMessageModal = () => setMessageModal(false);
 
 
-
+    const token=localStorage.getItem('auth_token')
+    const user_id =localStorage.getItem('user_id')
     const [isChatOpen, setIsChatOpen] = useState(false);
+
+
+    useEffect(() => {
+        if(token){
+            axios.get(`http://localhost:8080/user/getConvos/${user_id}`,{ headers: { "Content-Type": "Application/Json", Authorization: `Bearer ${token}` } })
+                .then(response => {
+                    console.log(response.data)
+                })
+                .catch(error => {
+                    console.error("There was an error fetching the experiences!", error);
+                });
+        }
+
+    }, []);
 
     const toggleChatBox = () => {
         setIsChatOpen(!isChatOpen);
@@ -139,23 +154,12 @@ function Main() {
                                                          style={{marginLeft: '7px'}}/>
                                         <div className="icon-label">Jobs</div>
                                     </div>
-                                    <div className="icon-container" onClick={handleOpenModal}
+                                    <div className="icon-container" onClick={showMessageModal}
                                          style={{'margin-right': '10px', cursor: 'pointer'}}>
                                         <FontAwesomeIcon icon={faMessage} className="icon"
                                                          style={{marginLeft: '25px'}}/>
                                         <div className="icon-label">Messages</div>
-                                        {/*<MessagesModal*/}
-                                        {/*    senderId={1}*/}
-                                        {/*    receiverId={2}*/}
-                                        {/*    show={showModal}*/}
-                                        {/*    handleClose={handleCloseModal}*/}
-                                        {/*/>*/}
-                                        {/*<MessagesModal*/}
-                                        {/*    senderId={1}*/}
-                                        {/*    receiverId={2}*/}
-                                        {/*    show={showModal}*/}
-                                        {/*    handleClose={handleCloseModal}*/}
-                                        {/*/>*/}
+
                                     </div>
                                     <div className="icon-container" onClick={handleShowFriendListModal}
                                          style={{cursor: 'pointer'}}>
