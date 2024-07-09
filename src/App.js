@@ -34,6 +34,8 @@ import ApplicantsPage from "./components/Advert/Applicants";
 import ChatBox from "./components/Messages/ChatBox";
 // import MessagesModal from './components/Messages/MessagesModal';
 import './components/Messages/Chatbox.css';
+import Conversations from "./components/Messages/Conversations";
+import FriendRequestsModal from "./components/Requests/FriendRequestsModal";
 
 function App() {
     return (
@@ -50,40 +52,38 @@ function Main() {
 
     const[messageModal,setMessageModal]=useState(false);
 
-    const [showModal, setShowModal] = useState(false);
-
-    const handleOpenModal = () => setShowModal(true);
-    const handleCloseModal = () => setShowModal(false);
 
     const handleShowFriendListModal = () => setFriendListModal(true);
     const handleCloseFriendListModal = () => setFriendListModal(false);
-    const showMessageModal = () => setMessageModal(true);
-    const closeMessageModal = () => setMessageModal(false);
 
 
     const token=localStorage.getItem('auth_token')
     const user_id =localStorage.getItem('user_id')
     const [isChatOpen, setIsChatOpen] = useState(false);
-
-
-    useEffect(() => {
-        if(token){
-            axios.get(`http://localhost:8080/user/getConvos/${user_id}`,{ headers: { "Content-Type": "Application/Json", Authorization: `Bearer ${token}` } })
-                .then(response => {
-                    console.log(response.data)
-                })
-                .catch(error => {
-                    console.error("There was an error fetching the experiences!", error);
-                });
-        }
-
-    }, []);
+    // const [conversations,setConversations]=useState({})
 
     const toggleChatBox = () => {
         setIsChatOpen(!isChatOpen);
     };
 
+    const showMessageModal = () => {
 
+        // axios.get(`http://localhost:8080/user/getConvos/${user_id}`,{ headers: { "Content-Type": "Application/Json", Authorization: `Bearer ${token}` } })
+        //             .then(response => {
+        //                 console.log('convos:');console.log(response.data);
+        //                 setConversations(response.data);
+        //             })
+        //             .catch(error => {
+        //                 console.error("There was an error fetching the experiences!", error);
+        //             });
+
+        setMessageModal(true);
+    };
+    const closeMessageModal = () => {
+        console.log('closing modal');
+        console.log('closing modal');
+        setMessageModal(false);
+    };
 
 
     const toJobSearch = () => {
@@ -96,9 +96,6 @@ function Main() {
 
     };
 
-    // useEffect(() => {
-    //     console.log(localStorage.getItem('auth_token'))
-    // }, []);
 
     const handleLogout = async () => {
 
@@ -158,6 +155,7 @@ function Main() {
                                          style={{'margin-right': '10px', cursor: 'pointer'}}>
                                         <FontAwesomeIcon icon={faMessage} className="icon"
                                                          style={{marginLeft: '25px'}}/>
+
                                         <div className="icon-label">Messages</div>
 
                                     </div>
@@ -189,29 +187,28 @@ function Main() {
                         </Nav>
                     </Navbar.Collapse>
                 </Container>
-                <Modal show={friendListModal} onHide={handleCloseFriendListModal}>
-                    <Modal.Header closeButton>
-                        <Modal.Title>Friend Requests</Modal.Title>
-                    </Modal.Header>
-                    <Modal.Body>
-                        <p>List of friend requests...</p>
-                    </Modal.Body>
-                    <Modal.Footer>
-                        <Button variant="secondary" onClick={handleCloseFriendListModal}>Close</Button>
-                    </Modal.Footer>
-                </Modal>
-                <Modal show={messageModal} onHide={closeMessageModal}>
-                    <Modal.Header closeButton>
-                        <Modal.Title>Messages</Modal.Title>
-                    </Modal.Header>
-                    <Modal.Body>
-                        <p>List of messages...</p>
-                    </Modal.Body>
-                    <Modal.Footer>
-                        <Button variant="secondary" onClick={closeMessageModal}>Close</Button>
-                    </Modal.Footer>
-                </Modal>
+                {/*<Modal show={friendListModal} onHide={handleCloseFriendListModal}>*/}
+                {/*    <Modal.Header closeButton>*/}
+                {/*        <Modal.Title>Friend Requests</Modal.Title>*/}
+                {/*    </Modal.Header>*/}
+                {/*    <Modal.Body>*/}
+                {/*        <p>List of friend requests...</p>*/}
+                {/*    </Modal.Body>*/}
+                {/*    <Modal.Footer>*/}
+                {/*        <Button variant="secondary" onClick={handleCloseFriendListModal}>Close</Button>*/}
+                {/*    </Modal.Footer>*/}
+                {/*</Modal>*/}
             </Navbar>
+
+
+            <Conversations
+                messageModal={messageModal}
+                closeMessageModal={closeMessageModal}
+            />
+
+            < FriendRequestsModal
+                friendListModal={friendListModal} handleCloseFriendListModal={handleCloseFriendListModal}
+            />
 
             <div className="container">
 
@@ -237,3 +234,5 @@ function Main() {
 
 
 export default App;
+
+

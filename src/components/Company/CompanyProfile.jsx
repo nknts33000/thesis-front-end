@@ -92,19 +92,6 @@ const CompanyProfilePage = () => {
         }
     };
 
-    // const fetchCompanyJobs = async () => {
-    //     try {
-    //         const response = await axios.get(`http://localhost:8080/user/getJobsOfCompany/${companyId}`, {
-    //             headers: {
-    //                 "Content-Type": "Application/Json",
-    //                 Authorization: `Bearer ${token}`
-    //             }
-    //         });
-    //         setJobs(response.data);
-    //     } catch (error) {
-    //         console.error("Error fetching company jobs", error);
-    //     }
-    // };
 
     const handleAddJob = () =>{
         navigate('/createAdvert', {state:{company}})

@@ -5,6 +5,7 @@ import axios from 'axios';
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faComment, faShare, faThumbsUp, faPencilAlt, faTrash, faPlusCircle} from "@fortawesome/free-solid-svg-icons";
 import ChatBox from "../Messages/ChatBox";
+import UserImage from "../Images/UserImage";
 
 const ProfilePage = () => {
     const navigate = useNavigate();
@@ -30,6 +31,7 @@ const ProfilePage = () => {
     const [showModal,setShowModal]=useState(false);
     const [content, setContent] = useState('');
     const [isChatOpen, setIsChatOpen] = useState(false);
+    const [trigger, setTrigger] = useState(0);
 
 
     useEffect(() => {
@@ -47,6 +49,11 @@ const ProfilePage = () => {
                 });
         }
     }, [token,navigate]);
+
+    useEffect(() => {
+        // Whenever the id changes, update the trigger state
+        setTrigger(prev => prev + 1);
+    }, [id]);
 
     useEffect(() => {
         // Log connection state on change
@@ -123,9 +130,6 @@ const ProfilePage = () => {
             .then(response => {
                 setProfile(response.data);
                 console.log(response.data)
-                // const imageUrl = URL.createObjectURL(new Blob([response.data.profilePicture], { type: response.headers['content-type'] }));
-                // setProfilePicUrl(imageUrl);
-                // console.log(imageUrl)
             })
             .catch(error => {
                 console.error("There was an error fetching the profile!", error);
@@ -229,9 +233,7 @@ const ProfilePage = () => {
             })
                 .then(response => {
                     console.log('Image uploaded successfully:', response.data);
-                    // Optionally, update the profile with the new image URL
-                    setProfile(prev => ({ ...prev, picture_url: response.data.picture_url }));
-                    getProfPic();
+                    setTrigger(prev => prev+1);
                 })
                 .catch(error => {
                     console.error('Error uploading image:', error);
@@ -529,16 +531,22 @@ const ProfilePage = () => {
                 <Col xs={12} md={4}>
                     <Card>
                         <Card.Body>
-                            <Image
-                                src={profilePicUrl ? profilePicUrl : "https://via.placeholder.com/150"}
-                                roundedCircle
-                                className="mb-3"
-                                style={{
-                                    width: '150px',
-                                    height: '150px',
-                                    objectFit: 'cover'
-                                }}
-                                alt="Profile"
+                            {/*<Image*/}
+                            {/*    src={profilePicUrl ? profilePicUrl : "https://via.placeholder.com/150"}*/}
+                            {/*    roundedCircle*/}
+                            {/*    className="mb-3"*/}
+                            {/*    style={{*/}
+                            {/*        width: '150px',*/}
+                            {/*        height: '150px',*/}
+                            {/*        objectFit: 'cover'*/}
+                            {/*    }}*/}
+                            {/*    alt="Profile"*/}
+                            {/*/>*/}
+
+                            <UserImage
+                                id={id}
+                                size={'150px'}
+                                trigger={trigger}
                             />
 
                             { user_id===id &&
