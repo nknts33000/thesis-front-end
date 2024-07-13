@@ -71,23 +71,27 @@ const Conversations = ({ messageModal, closeMessageModal }) => {
                     <Modal.Title>Messages</Modal.Title>
                 </Modal.Header>
                 <Modal.Body className="conversations-modal-body">
-                    <div className="conversations-list">
-                        {Object.keys(convos).map((userJson) => {
-                            const user = JSON.parse(userJson);
-                            const latestMessage = convos[userJson][convos[userJson].length - 1]; // Get the last message in the list. The latest messages are in the end of the array
-                            //const latestMessage = convos[userJson][0]; // Assuming the latest message is the first one in the list
-                            console.log('latest message')
-                            console.log(latestMessage);
-                            return (
-                                <ConversationItem
-                                    key={user.id}
-                                    user={user}
-                                    latestMessage={latestMessage}
-                                    onClick={() => handleConversationClick(user)}
-                                />
-                            );
-                        })}
-                    </div>
+                    {Object.keys(convos).length>0?(
+                        <div className="conversations-list">
+                            {Object.keys(convos).map((userJson) => {
+                                const user = JSON.parse(userJson);
+                                const latestMessage = convos[userJson][convos[userJson].length - 1]; // Get the last message in the list. The latest messages are in the end of the array
+                                //const latestMessage = convos[userJson][0]; // Assuming the latest message is the first one in the list
+                                console.log('latest message')
+                                console.log(latestMessage);
+                                return (
+                                    <ConversationItem
+                                        key={user.id}
+                                        user={user}
+                                        latestMessage={latestMessage}
+                                        onClick={() => handleConversationClick(user)}
+                                    />
+                                );
+                            })}
+                        </div>
+
+                    ): (<div><h5>No messages.</h5></div>)}
+
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" onClick={closeMessageModal}>Close</Button>

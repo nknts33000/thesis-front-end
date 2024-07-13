@@ -4,6 +4,7 @@ import { Container, Button, Modal, Form, Card, Image } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faThumbsUp, faComment, faShare} from '@fortawesome/free-solid-svg-icons';
 import './LandingPage.css';
+import Post from "../Posts/Post";
 
 
 function LandingPage() {
@@ -137,70 +138,7 @@ function LandingPage() {
             <p>This is the welcome page after successful login.</p>
             <Button variant="primary" onClick={handleShowModal}>New post</Button>
 
-            {posts.length > 0 ? (
-
-                posts.map((post, index) => (
-
-                    <Card key={index} className="mt-3">
-                        <Card.Title>
-                            <Image
-                                src={post.profile && post.profile.picture_url ? post.profile.picture_url : ""}
-                                roundedCircle
-                                style={{ marginRight: '10px', width: '30px', height: '30px' }}
-                            />
-                        </Card.Title>
-                        <Card.Body>
-                            <Card.Title>{post.firstname} {post.lastname}</Card.Title>
-                            <Card.Text>{post.post.content }</Card.Text>
-                            <div>
-                                <FontAwesomeIcon icon={faThumbsUp} style={{cursor: 'pointer', marginRight: '10px'}} />
-                                <FontAwesomeIcon icon={faComment} style={{cursor: 'pointer', marginRight: '10px'}} />
-                                <FontAwesomeIcon icon={faShare} style={{cursor: 'pointer', marginRight: '10px'}} />
-                            </div>
-                        </Card.Body>
-                        {/* Comments section */}
-                        <div className="comments-section">
-
-
-                            {/* New comment input */}
-                            <div className="new-comment-input">
-                                <textarea
-                                    value={newComments[index] || ''}
-                                    onChange={(event) => handleCommentChange(index, event)}
-                                    placeholder="Add a comment..."
-                                    className="comment-input"
-                                />
-                                <button onClick={() => submitComment(index)}>Post</button>
-
-                            </div>
-                            {/* Existing comments */}
-                            <div className="existing-comments mb-2">
-                                {post.comments.map((comment, cIndex) => (
-                                    <div key={cIndex} className="p-2 border rounded my-1 bg-light">
-
-                                        {/* Display commentator's profile picture */}
-                                        <div className="commentator-info">
-                                            <Image
-                                                src={comment.picture_url ? comment.user.picture_url : ""}
-                                                roundedCircle
-                                                style={{ marginRight: '10px', width: '30px', height: '30px' }}
-                                            />
-                                            <strong>{comment.firstname} {comment.lastname}</strong>
-                                        </div>
-                                        {/* Comment text */}
-                                        <div>{comment.content}</div>
-
-
-                                    </div>
-                                ))}
-                            </div>
-
-                        </div>
-                    </Card>
-                ))
-            ) : (
-                <div className="mt-3">No posts yet.</div>
-            )}
+            <Post initialPostDtos={posts} />
 
             <Modal show={showModal} onHide={handleCloseModal}>
                 <Modal.Header closeButton>

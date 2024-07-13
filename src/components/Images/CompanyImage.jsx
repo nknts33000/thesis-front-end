@@ -2,7 +2,7 @@ import {Image} from "react-bootstrap";
 import React, {useEffect, useState} from "react";
 import axios from "axios";
 
-const UserImage = ({id,size,trigger}) =>{
+const CompanyImage = ({companyId,size,trigger}) =>{
 
     const [profilePicUrl,setProfilePicUrl]=useState(null);
     const token=localStorage.getItem('auth_token');
@@ -12,7 +12,7 @@ const UserImage = ({id,size,trigger}) =>{
     },[trigger]);
 
     const getProfPic =async ()=>{
-        axios.get(`http://localhost:8080/user/profilePic/${id}`, {
+        axios.get(`http://localhost:8080/user/getCompanyLogo/${companyId}`, {
             headers: {
                 "Authorization": `Bearer ${token}`,
                 "Content-Type": "application/json"
@@ -32,7 +32,7 @@ const UserImage = ({id,size,trigger}) =>{
             })
             .catch(error => {
                 setProfilePicUrl(null);
-                console.error("There was an error fetching the profile picture!", error);
+                console.error("There was an error fetching the company logo!", error);
             });
     };
 
@@ -51,4 +51,4 @@ const UserImage = ({id,size,trigger}) =>{
     );
 };
 
-export default UserImage;
+export default CompanyImage;

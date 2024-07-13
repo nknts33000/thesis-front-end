@@ -62,17 +62,22 @@ const FriendRequestsModal = ({ friendListModal, handleCloseFriendListModal }) =>
                 <Modal.Title>Friend Requests</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-                {friendRequests.map(request => (
-                    <div key={request.id} style={{marginBottom:'60px'}}>
-                        <div style={{cursor:'pointer'}} onClick={()=>toUsersProf(request.user1.id)}>
-                            <UserImage id={request.user1.id} size={'70px'} />
-                            <p>{request.user1.firstname} {request.user1.lastname}</p>
-                        </div>
+                {friendRequests.length>0?(
+                    friendRequests.map(request => (
+                        <div key={request.id} style={{marginBottom:'60px'}}>
+                            <div style={{cursor:'pointer'}} onClick={()=>toUsersProf(request.user1.id)}>
+                                <UserImage id={request.user1.id} size={'70px'} />
+                                <p>{request.user1.firstname} {request.user1.lastname}</p>
+                            </div>
 
-                        <Button variant="success" onClick={() => acceptFriendRequest(request.user1.id)}>Accept</Button>
-                        <Button variant="danger" onClick={() => rejectFriendRequest(request.user1.id)}>Decline</Button>
-                    </div>
-                ))}
+                            <Button variant="success" onClick={() => acceptFriendRequest(request.user1.id)}>Accept</Button>
+                            <Button variant="danger" onClick={() => rejectFriendRequest(request.user1.id)}>Decline</Button>
+                        </div>
+                    ))
+                ): (
+                    <div><h5>No new requests.</h5></div>
+                )}
+
             </Modal.Body>
             <Modal.Footer>
                 <Button variant="secondary" onClick={handleCloseFriendListModal}>Close</Button>

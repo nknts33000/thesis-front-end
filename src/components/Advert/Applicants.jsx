@@ -56,6 +56,39 @@ const ApplicantsPage = () => {
         });
     };
 
+    const handleDownload = async (resumeId) => {
+        try {
+            const response = await axios.get(`http://localhost:8080/user/download/${resumeId}`, {
+                responseType: 'blob',
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            // Extract filename from Content-Disposition header if available
+            const contentDisposition = response.headers['content-disposition'];
+            let filename = 'resume_file.pdf'; // Default filename if header is not present
+            if (contentDisposition) {
+                const filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+                const matches = filenameRegex.exec(contentDisposition);
+                if (matches != null && matches[1]) {
+                    filename = matches[1].replace(/['"]/g, '');
+                }
+            }
+
+            // Create a blob URL for the blob data from the response
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', filename);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+
+        } catch (error) {
+            console.error('Error downloading the resume', error);
+        }
+    };
+
 
     return (
         <Container>
@@ -78,7 +111,7 @@ const ApplicantsPage = () => {
                                         <h5>{resume.filename}</h5>
                                         <button
                                             className="btn btn-link"
-                                            onClick={() => downloadResume(resume.filepath, resume.filename)}
+                                            onClick={() => handleDownload(resume.id)}
                                         >
                                             Download Resume
                                         </button>

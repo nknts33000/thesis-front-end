@@ -6,6 +6,7 @@ import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faComment, faShare, faThumbsUp, faPencilAlt, faTrash, faPlusCircle} from "@fortawesome/free-solid-svg-icons";
 import ChatBox from "../Messages/ChatBox";
 import UserImage from "../Images/UserImage";
+import Post from "../Posts/Post";
 
 const ProfilePage = () => {
     const navigate = useNavigate();
@@ -531,18 +532,6 @@ const ProfilePage = () => {
                 <Col xs={12} md={4}>
                     <Card>
                         <Card.Body>
-                            {/*<Image*/}
-                            {/*    src={profilePicUrl ? profilePicUrl : "https://via.placeholder.com/150"}*/}
-                            {/*    roundedCircle*/}
-                            {/*    className="mb-3"*/}
-                            {/*    style={{*/}
-                            {/*        width: '150px',*/}
-                            {/*        height: '150px',*/}
-                            {/*        objectFit: 'cover'*/}
-                            {/*    }}*/}
-                            {/*    alt="Profile"*/}
-                            {/*/>*/}
-
                             <UserImage
                                 id={id}
                                 size={'150px'}
@@ -617,9 +606,7 @@ const ProfilePage = () => {
                             <Card.Text><small className="text-muted">{profile.industry}</small></Card.Text>
                         </Card.Body>
                     </Card>
-                </Col>
-                <Col xs={12} md={8}>
-                    <Card>
+                    <Card style={{marginTop:'15px',width:'250%'}}>
                         <Card.Body>
                             <Card.Title>About Me
 
@@ -691,70 +678,8 @@ const ProfilePage = () => {
 
             <Row className="mt-4">
                 <Col xs={12}>
-                    {posts.length > 0 ? (
 
-                        posts.map((post, index) => (
-
-                            <Card key={index} className="mt-3">
-                                <Card.Title>
-                                    <Image
-                                        src={profile && profile.picture_url ? profile.picture_url : ""}
-                                        roundedCircle
-                                        style={{ marginRight: '10px', width: '30px', height: '30px' }}
-                                    />
-                                </Card.Title>
-                                <Card.Body>
-                                    <Card.Title>{user.firstname} {user.lastname}</Card.Title>
-                                    <Card.Text>{post.content }</Card.Text>
-                                    <div>
-                                        <FontAwesomeIcon icon={faThumbsUp} style={{cursor: 'pointer', marginRight: '10px'}} />
-                                        <FontAwesomeIcon icon={faComment} style={{cursor: 'pointer', marginRight: '10px'}} />
-                                        <FontAwesomeIcon icon={faShare} style={{cursor: 'pointer', marginRight: '10px'}} />
-                                    </div>
-                                </Card.Body>
-                                {/* Comments section */}
-                                <div className="comments-section">
-
-
-                                    {/* New comment input */}
-                                    <div className="new-comment-input">
-                                <textarea
-                                    value={newComments[index] || ''}
-                                    onChange={(event) => handleCommentChange(index, event)}
-                                    placeholder="Add a comment..."
-                                    className="comment-input"
-                                />
-                                        <button onClick={() => submitComment(index)}>Post</button>
-
-                                    </div>
-                                    {/* Existing comments */}
-                                    <div className="existing-comments mb-2">
-                                        {post.comments.map((comment, cIndex) => (
-                                            <div key={cIndex} className="p-2 border rounded my-1 bg-light">
-
-                                                {/* Display commentator's profile picture */}
-                                                <div className="commentator-info">
-                                                    <Image
-                                                        src={comment.picture_url ? comment.user.picture_url : ""}
-                                                        roundedCircle
-                                                        style={{ marginRight: '10px', width: '30px', height: '30px' }}
-                                                    />
-                                                    <strong>{comment.firstname} {comment.lastname}</strong>
-                                                </div>
-                                                {/* Comment text */}
-                                                <div>{comment.content}</div>
-
-
-                                            </div>
-                                        ))}
-                                    </div>
-
-                                </div>
-                            </Card>
-                        ))
-                    ) : (
-                        <div className="mt-3">No posts yet.</div>
-                    )}
+                    <Post initialPostDtos={posts} />
                 </Col>
             </Row>
 

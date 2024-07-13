@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Container, Row, Col, Card, Button, Modal, Form, Image } from 'react-bootstrap';
+import {Container, Row, Col, Card, Button, Modal, Form, Image, CardBody, CardTitle} from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPencilAlt, faPlusCircle, faTrash, faThumbsUp, faComment, faShare } from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
 import {useNavigate, useParams} from "react-router-dom";
+import CompanyImage from "../Images/CompanyImage";
 
 const CompanyProfilePage = () => {
     const [company, setCompany] = useState(null);
     const [posts, setPosts] = useState([]);
-    const [jobs, setJobs] = useState([]);
     const [showPostModal, setShowPostModal] = useState(false);
     const [currentPost, setCurrentPost] = useState(null);
     const { companyId } = useParams();
@@ -20,11 +20,16 @@ const CompanyProfilePage = () => {
     const [selectedTab, setSelectedTab] = useState("posts"); // State for the selected tab
     const navigate = useNavigate();
     const [isAdmin,setIsAdmin]=useState(false);
+    const [showMissionModal,setShowMissionModal]=useState(false);
+    const [mission, setMission] = useState('');
+    const [trigger, setTrigger] = useState(0);
+    const [follows,setFollows]=useState(false);
 
     useEffect(() => {
         fetchCompanyData();
         fetchCompanyPosts();
-        //fetchCompanyJobs();
+        followerStatus();
+
         fetchCompanyLogo();
         fetchAdminData();
     }, []);
@@ -163,6 +168,7 @@ const CompanyProfilePage = () => {
             })
                 .then(response => {
                     console.log('Image uploaded successfully:', response.data);
+                    setTrigger(prev => prev+1);
                 })
                 .catch(error => {
                     console.error('Error uploading image:', error);
@@ -174,39 +180,122 @@ const CompanyProfilePage = () => {
         navigate(`/advert/${companyId}/${advertId}`)
     };
 
+    const handleCloseMissionModal = () => {
+        setShowMissionModal(false);
+        // Reset about me content if user cancels
+        setMission(company ? company.mission || '' : '');
+    };
+
+    const handleMissionChange = (event) => {
+        setMission(event.target.value);
+    };
+
+    const follow = async()=>{
+        axios.put(`http://localhost:8080/user/follow/${user_id}/${companyId}`,{},{
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${localStorage.getItem('auth_token')}`
+            }
+        }).then(response=>{
+            followerStatus();
+        }).catch(e=>{
+            console.log('error following:',e);
+        });
+    };
+
+    const handleSaveMission = () => {
+        // Send a request to save the about me content
+        axios.put(
+            `http://localhost:8080/user/setMission/${companyId}`,
+            { mission: mission },
+            {
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${localStorage.getItem('auth_token')}`
+                }
+            }
+        )
+            .then(response => {
+                console.log("Mission saved successfully:", response.data);
+                setShowMissionModal(false);
+                fetchCompanyData();
+            })
+            .catch(error => {
+                console.error("Error saving mission:", error);
+            });
+    };
+
+    const followerStatus = async() =>{
+        axios.get(`http://localhost:8080/user/isFollower/${user_id}/${companyId}`, {
+            headers: { "Content-Type": "Application/Json", Authorization: `Bearer ${token}` }
+        }).then(
+            res=>{
+                setFollows(res.data);
+            }
+        ).catch(e=>{
+            console.log('problem fetching follower status:',e);
+        })
+    };
+
+    const unfollow= async ()=>{
+        axios.put(`http://localhost:8080/user/unfollow/${user_id}/${companyId}`,{},{
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${localStorage.getItem('auth_token')}`
+            }
+        }).then(response=>{
+            followerStatus();
+        }).catch(e=>{
+            console.log('error unfollowing:',e);
+        })
+    };
+
+
     if (!company) return <div>Loading...</div>;
 
     return (
         <Container>
-            <Row className="mt-4">
-                <Col md={4} className="text-center">
-                    <Image
-                        src={logo || 'placeholder.jpg'}
-                        roundedCircle
-                        style={{ width: '150px', height: '150px', objectFit: 'cover', cursor: 'pointer' }}
 
-                            // onClick={handleImageClick}
-                    />
-                    {isAdmin &&
-                        <FontAwesomeIcon icon={faPlusCircle} size="lg" className="ml-2" onClick={handleImageClick} style={{ cursor: 'pointer' }} />
-                    }
-                    <input
-                        type="file"
-                        accept="image/*"
-                        ref={fileInputRef}
-                        style={{ display: 'none' }}
-                        onChange={handleFileChange}
-                    />
-                    <h3>{company.name}</h3>
-                </Col>
-                <Col md={8}>
+            <Row className="mt-4">
+                <Col md={4} xs={12}>
                     <Card>
                         <Card.Body>
-                            <Card.Title>Mission</Card.Title>
+                            <CompanyImage companyId={companyId} size={'150px'} trigger={trigger} />
+                            {isAdmin &&
+                                <FontAwesomeIcon icon={faPlusCircle} size="lg" className="ml-2" onClick={handleImageClick} style={{ cursor: 'pointer' }} />
+                            }
+                            <input
+                                type="file"
+                                accept="image/*"
+                                ref={fileInputRef}
+                                style={{ display: 'none' }}
+                                onChange={handleFileChange}
+                            />
+                            <h3 style={{marginLeft:'20px'}}>{company.name}</h3>
+                            {!isAdmin && (follows?(
+                                    <Button variant="secondary" onClick={unfollow}>
+                                        Unfollow
+                                    </Button>
+                                ):(
+                                    <Button variant="primary" onClick={follow}>
+                                        Follow
+                                    </Button>
+                                ))
+                            }
+                        </Card.Body>
+                    </Card>
+                    <Card style={{marginTop:'15px',width:'250%'}}>
+                        <Card.Body>
+                            <Card.Title>Mission
+                                {isAdmin &&
+                                    <FontAwesomeIcon icon={faPencilAlt} className="ml-2" style={{ cursor: 'pointer' }} onClick={() => setShowMissionModal(true)} />
+                                }
+                            </Card.Title>
                             <p>{company.mission}</p>
                         </Card.Body>
                     </Card>
                 </Col>
+
             </Row>
             <Row className="mt-4">
                 <Col md={12}>
@@ -277,20 +366,36 @@ const CompanyProfilePage = () => {
                 </Col>
             </Row>
 
+            <Modal show={showMissionModal} onHide={handleCloseMissionModal}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Edit About Me</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form>
+                        <Form.Group controlId="formAboutMe">
+                            <Form.Label>About Me</Form.Label>
+                            <Form.Control
+                                as="textarea"
+                                rows={5}
+                                value={mission}
+                                onChange={handleMissionChange}
+                                placeholder="Enter about me content"
+                            />
+                        </Form.Group>
+                    </Form>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={handleCloseMissionModal}>Cancel</Button>
+                    <Button variant="primary" onClick={handleSaveMission}>Save</Button>
+                </Modal.Footer>
+            </Modal>
+
             <Modal show={showPostModal} onHide={() => setShowPostModal(false)}>
                 <Modal.Header closeButton>
                     <Modal.Title>{'Add Post'}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <Form>
-                    {/*    <Form.Group>*/}
-                    {/*        <Form.Label>Title</Form.Label>*/}
-                    {/*        <Form.Control*/}
-                    {/*            type="text"*/}
-                    {/*            value={currentPost.title}*/}
-                    {/*            onChange={(e) => setCurrentPost({ ...currentPost, title: e.target.value })}*/}
-                    {/*        />*/}
-                    {/*    </Form.Group>*/}
                         <Form.Group>
                             <Form.Label>Content</Form.Label>
                             <Form.Control
