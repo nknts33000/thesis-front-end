@@ -7,7 +7,7 @@ import axios from "axios";
 import {useNavigate} from "react-router-dom";
 import CompanyImage from "../Images/CompanyImage";
 
-const Post = ({ initialPostDtos }) => {
+const CompanyPosts = ({ initialPostDtos }) => {
     const [postdtos, setPostDtos] = useState([]); // State variable for posts data
     const [newComments, setNewComments] = useState({}); // State variable for new comments
     const user_id = localStorage.getItem('user_id');
@@ -15,7 +15,6 @@ const Post = ({ initialPostDtos }) => {
 
     useEffect(() => {
         setPostDtos(initialPostDtos);
-        console.log('initial company posts:',initialPostDtos)
     }, [initialPostDtos]);
 
     const handleCommentChange = (index, event) => {
@@ -83,30 +82,19 @@ const Post = ({ initialPostDtos }) => {
         navigate(`/user/${id}`);
     };
 
-    const toCompanyPage = (companyId) =>{
-        navigate(`/company/${companyId}`);
-    };
-
     return (
         <>
             {postdtos.length > 0 ? (
                 postdtos.map((postdto, index) => (
                     <Card key={index} className="mt-3">
+                        {/*<Card.Title>*/}
+                        {/*    */}
+                        {/*</Card.Title>*/}
                         <Card.Body>
-                            {postdto.user?(
-
-                                <Card.Title onClick={()=>toUserProf(postdto.user.id)} style={{cursor:'pointer'}}>
-                                    <UserImage id={postdto.user.id} size={'60px'} />
-                                    <strong style={{marginLeft:'10px'}}>{postdto.user.firstname} {postdto.user.lastname}</strong>
-                                </Card.Title>
-                            ):(
-
-                                <Card.Title onClick={()=>toCompanyPage(postdto.company.companyId)} style={{cursor:'pointer'}}>
-                                    <CompanyImage companyId={postdto.company.companyId} size={'60px'} />
-                                    <strong style={{marginLeft:'10px'}}>{postdto.company.name}</strong>
-                                </Card.Title>
-                            )}
-
+                            <Card.Title onClick={()=>toUserProf(postdto.user.id)} style={{cursor:'pointer'}}>
+                                <CompanyImage id={postdto.user.id} size={'60px'} />
+                                <strong style={{marginLeft:'10px'}}>{postdto.user.firstname} {postdto.user.lastname}</strong>
+                            </Card.Title>
                             <Card.Text>{postdto.post.content}</Card.Text>
                             <div>
                                 <FontAwesomeIcon
@@ -163,4 +151,4 @@ const Post = ({ initialPostDtos }) => {
     );
 };
 
-export default Post;
+export default CompanyPosts;

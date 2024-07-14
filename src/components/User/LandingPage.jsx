@@ -134,7 +134,7 @@ function LandingPage() {
 
     return (
         <Container className="mt-5">
-            <h2>Welcome to Your App! </h2>
+            <h2>Welcome to JobNet! </h2>
             <p>This is the welcome page after successful login.</p>
             <Button variant="primary" onClick={handleShowModal}>New post</Button>
 

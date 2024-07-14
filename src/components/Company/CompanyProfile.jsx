@@ -5,10 +5,11 @@ import { faPencilAlt, faPlusCircle, faTrash, faThumbsUp, faComment, faShare } fr
 import axios from 'axios';
 import {useNavigate, useParams} from "react-router-dom";
 import CompanyImage from "../Images/CompanyImage";
+import Post from "../Posts/Post";
 
 const CompanyProfilePage = () => {
     const [company, setCompany] = useState(null);
-    const [posts, setPosts] = useState([]);
+    const [postdtos, setPostdtos] = useState([]);
     const [showPostModal, setShowPostModal] = useState(false);
     const [currentPost, setCurrentPost] = useState(null);
     const { companyId } = useParams();
@@ -91,7 +92,8 @@ const CompanyProfilePage = () => {
                     Authorization: `Bearer ${token}`
                 }
             });
-            setPosts(response.data);
+            console.log('posts of company',response.data)
+            setPostdtos(response.data);
         } catch (error) {
             console.error("Error fetching company posts", error);
         }
@@ -257,7 +259,7 @@ const CompanyProfilePage = () => {
         <Container>
 
             <Row className="mt-4">
-                <Col md={4} xs={12}>
+                <Col xs={12} md={4}>
                     <Card>
                         <Card.Body>
                             <CompanyImage companyId={companyId} size={'150px'} trigger={trigger} />
@@ -316,29 +318,8 @@ const CompanyProfilePage = () => {
                                                 {/*<FontAwesomeIcon icon={faPlusCircle} />*/}
                                             </Button>
                                         }
-                                    {posts.map((post, index) => (
-                                        <Card key={index} className="mb-2">
-                                            <Card.Body>
-                                                <Card.Title>{post.title}</Card.Title>
-                                                <Card.Text>{post.content}</Card.Text>
-                                                <Button variant="link" onClick={() => handleEditPost(post)}>
-                                                    <FontAwesomeIcon icon={faPencilAlt} />
-                                                </Button>
-                                                <Button variant="link" onClick={() => handleDeletePost(post.postId)}>
-                                                    <FontAwesomeIcon icon={faTrash} />
-                                                </Button>
-                                                <Button variant="link">
-                                                    <FontAwesomeIcon icon={faThumbsUp} />
-                                                </Button>
-                                                <Button variant="link">
-                                                    <FontAwesomeIcon icon={faComment} />
-                                                </Button>
-                                                <Button variant="link">
-                                                    <FontAwesomeIcon icon={faShare} />
-                                                </Button>
-                                            </Card.Body>
-                                        </Card>
-                                    ))}
+
+                                    <Post initialPostDtos={postdtos} />
                                 </>
 
                     )}

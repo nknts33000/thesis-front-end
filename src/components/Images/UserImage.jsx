@@ -23,8 +23,14 @@ const UserImage = ({id,size,trigger}) =>{
                 try {
                     console.log('response'+response.data);
                     const blob = new Blob([response.data], { type: response.headers['content-type'] });
-                    const imageUrl = URL.createObjectURL(blob);
-                    setProfilePicUrl(imageUrl);
+                    if(blob.size!==0){
+                        const imageUrl = URL.createObjectURL(blob);
+                        setProfilePicUrl(imageUrl);
+                    }
+                    else{
+                        setProfilePicUrl(null);
+                    }
+                    console.log('blob size:',blob.size)
                 }
                 catch (e){
                     setProfilePicUrl(null);
@@ -38,7 +44,7 @@ const UserImage = ({id,size,trigger}) =>{
 
     return(
         <Image
-            src={profilePicUrl ? profilePicUrl : "https://via.placeholder.com/150"}
+            src={profilePicUrl ? profilePicUrl : "/noimage.jpg"}
             roundedCircle
             className="mb-3"
             style={{
@@ -48,6 +54,8 @@ const UserImage = ({id,size,trigger}) =>{
             }}
             alt="Profile"
         />
+
+
     );
 };
 

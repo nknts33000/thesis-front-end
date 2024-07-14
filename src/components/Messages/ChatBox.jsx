@@ -3,14 +3,17 @@ import React, {useEffect, useState} from 'react';
 import { Modal, InputGroup, FormControl, Button } from 'react-bootstrap';
 import './Chatbox.css';
 import axios from "axios";
+import UserImage from "../Images/UserImage";
 
 const ChatBox = ({ show, handleClose, user_id, id }) => {
     const [messages, setMessages] = useState([]);
     const [input, setInput] = useState('');
+    const [user,setUser]=useState([]);
     const token=localStorage.getItem('auth_token');
 
     useEffect(() => {
         getAllMessages();
+        findUser();
 
         console.log('user_id:'+user_id)
     }, []);
@@ -24,6 +27,17 @@ const ChatBox = ({ show, handleClose, user_id, id }) => {
             setMessages(response.data)
         }).catch(error => {
             console.error("There was an error fetching the messages!", error);
+        });
+    };
+
+    const findUser =async ()=>{
+        axios.get(
+            `http://localhost:8080/user/findUser/${id}`,{ headers:
+                    { "Content-Type": "Application/Json", Authorization: `Bearer ${token}` } }
+        ).then(response =>{
+            setUser(response.data)
+        }).catch(error => {
+            console.error("There was an error fetching the user!", error);
         });
     };
 
@@ -62,18 +76,25 @@ const ChatBox = ({ show, handleClose, user_id, id }) => {
     return (
         <Modal show={show} onHide={handleClose} className="chat-box" animation={false} centered>
             <Modal.Header closeButton>
-                <Modal.Title>Chat</Modal.Title>
+                <UserImage id={id} size={'45px'} />
+                {user &&
+                    <Modal.Title style={{marginLeft:'15px',marginBottom:'10px'}}>{user.firstname} {user.lastname}</Modal.Title>
+                }
             </Modal.Header>
             <Modal.Body>
                 <div className="chat-content">
-                    {messages.map((message, index) => (
-                        <div
-                            key={index}
-                            className={`message ${message.sender.id == user_id ? 'sent' : 'received'}`}
-                        >
-                            <span>{message.content}</span>
-                        </div>
-                    ))}
+                    {messages.length>0?(
+                        messages.map((message, index) => (
+                            <div
+                                key={index}
+                                className={`message ${message.sender.id == user_id ? 'sent' : 'received'}`}
+                            >
+                                <span>{message.content}</span>
+                            </div>
+                        ))
+                    ): (
+                        <div><h5>No messages.</h5></div>
+                    )}
                 </div>
             </Modal.Body>
             <Modal.Footer>
