@@ -319,7 +319,7 @@ const CompanyProfilePage = () => {
                                             </Button>
                                         }
 
-                                    <Post initialPostDtos={postdtos} />
+                                    <Post initialPostDtos={postdtos} fetchPosts={fetchCompanyPosts}/>
                                 </>
 
                     )}

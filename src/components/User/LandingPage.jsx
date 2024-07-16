@@ -18,32 +18,32 @@ function LandingPage() {
         if(localStorage.getItem('auth_token') === null || localStorage.getItem('auth_token') === 'null') {
             navigate('/');
         }
-        const fetchPosts = async () => {
-            const token = localStorage.getItem('auth_token');
-            const headers = {
-                'Content-type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            };
 
-            const response = await fetch('http://localhost:8080/user/get_friends_posts', {
-                method: 'POST',
-                headers: headers,
-                body: JSON.stringify({ token: token })
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                console.log(data);
-                setPosts(data);
-                //fetchComments(data);
-            } else {
-                console.error('Failed to fetch posts');
-            }
-        };
 
         fetchPosts();
     }, [navigate]);
+    const fetchPosts = async () => {
+        const token = localStorage.getItem('auth_token');
+        const headers = {
+            'Content-type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        };
 
+        const response = await fetch('http://localhost:8080/user/get_friends_posts', {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify({ token: token })
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            console.log(data);
+            setPosts(data);
+            //fetchComments(data);
+        } else {
+            console.error('Failed to fetch posts');
+        }
+    };
     const handleShowModal = () => setShowModal(true);
     const handleCloseModal = () => setShowModal(false);
 
@@ -138,7 +138,7 @@ function LandingPage() {
             <p>This is the welcome page after successful login.</p>
             <Button variant="primary" onClick={handleShowModal}>New post</Button>
 
-            <Post initialPostDtos={posts} />
+            <Post initialPostDtos={posts} fetchPosts={fetchPosts}/>
 
             <Modal show={showModal} onHide={handleCloseModal}>
                 <Modal.Header closeButton>

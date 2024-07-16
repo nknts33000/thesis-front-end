@@ -679,7 +679,7 @@ const ProfilePage = () => {
             <Row className="mt-4">
                 <Col xs={12}>
 
-                    <Post initialPostDtos={posts} />
+                    <Post initialPostDtos={posts} fetchPosts={getPosts}/>
                 </Col>
             </Row>
 

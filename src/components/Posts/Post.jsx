@@ -1,22 +1,93 @@
-import React, {useEffect, useState} from "react";
-import { Card, Image } from "react-bootstrap";
+import React, { useEffect, useState } from "react";
+import {Card, Col, Row} from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faComment, faShare, faThumbsUp } from "@fortawesome/free-solid-svg-icons";
 import UserImage from "../Images/UserImage";
 import axios from "axios";
-import {useNavigate} from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import CompanyImage from "../Images/CompanyImage";
 
-const Post = ({ initialPostDtos }) => {
-    const [postdtos, setPostDtos] = useState([]); // State variable for posts data
+const Post = ({ initialPostDtos, fetchPosts }) => {
+    const [postDtos, setPostDtos] = useState([]); // State variable for posts data
     const [newComments, setNewComments] = useState({}); // State variable for new comments
+    const [likedStatus, setLikedStatus] = useState({}); // State variable for liked status of posts
+    const [posts, setPosts] = useState([]); // Ensure posts is initialized as an empty array
     const user_id = localStorage.getItem('user_id');
-    const navigate=useNavigate();
+    const navigate = useNavigate();
 
     useEffect(() => {
         setPostDtos(initialPostDtos);
-        console.log('initial company posts:',initialPostDtos)
+        console.log('initial company posts:', initialPostDtos);
+        fetchLikedStatus(initialPostDtos);
+        console.log('find post')
     }, [initialPostDtos]);
+
+    // const fetchLikedStatus = async (posts) => {
+    //     const token = localStorage.getItem('auth_token');
+    //     const headers = {
+    //         'Content-type': 'application/json',
+    //         'Authorization': `Bearer ${token}`
+    //     };
+    //     console.log('type of posts',Array.isArray(posts));
+    //     const postsarray=new Array(posts);
+    //     const postIds= Array();
+    //     postsarray.forEach(postDTO => {
+    //         if (postDTO && postDTO.post && postDTO.post.postId) {
+    //             postIds.push(postDTO.post.postId);
+    //         } else {
+    //             console.error("Invalid postDTO structure:", postDTO);
+    //         }
+    //     });
+    //
+    //     try {
+    //         const response = await axios.post(`http://localhost:8080/user/checkLikes/${user_id}`, { postIds:postIds }, { headers });
+    //         setLikedStatus(response.data); // Assuming response.data is an object with post IDs as keys and boolean liked status as values
+    //         console.log('liked status',response.data)
+    //     } catch (error) {
+    //         console.error("Error fetching liked status:", error);
+    //     }
+    // };
+
+    const fetchLikedStatus = async (posts) => {
+        const token = localStorage.getItem('auth_token');
+        const headers = {
+            'Content-type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        };
+
+        // Check if posts is an array
+        console.log('type of posts', Array.isArray(posts));
+        if (!Array.isArray(posts)) {
+            console.error('Posts is not an array:', posts);
+            return;
+        }
+
+        // Extract postIds from posts
+        const postIds = posts.map(postDTO => {
+            if (postDTO && postDTO.post && postDTO.post.postId) {
+                return postDTO.post.postId;
+            } else {
+                console.error('Invalid postDTO structure:', postDTO);
+                return null;
+            }
+        }).filter(postId => postId !== null);
+
+        console.log('postIds', postIds);
+
+        try {
+            const response = await axios.post(
+                `http://localhost:8080/user/checkLikes/${user_id}`,
+                { postIds: postIds }, // Sending postIds array in the request body
+                { headers }
+            );
+            setLikedStatus(response.data); // Assuming response.data is an object with post IDs as keys and boolean liked status as values
+            console.log('liked status', response.data);
+        } catch (error) {
+            console.error("Error fetching liked status:", error);
+        }
+    };
+
+
 
     const handleCommentChange = (index, event) => {
         const { value } = event.target;
@@ -27,7 +98,7 @@ const Post = ({ initialPostDtos }) => {
     };
 
     const submitComment = async (index) => {
-        const post = postdtos[index].post; // Access the specific post using the index
+        const post = postDtos[index].post; // Access the specific post using the index
 
         if (!post) {
             console.error("Invalid post or postId");
@@ -76,52 +147,111 @@ const Post = ({ initialPostDtos }) => {
             console.error("Error submitting comment:", error);
         }
 
-        // getPosts();
     };
 
-    const toUserProf = (id) =>{
+    const toUserProf = (id) => {
         navigate(`/user/${id}`);
     };
 
-    const toCompanyPage = (companyId) =>{
+    const toCompanyPage = (companyId) => {
         navigate(`/company/${companyId}`);
+    };
+
+    const likePost = async (post_id) => {
+        const token = localStorage.getItem('auth_token');
+        const headers = {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+        };
+
+        try {
+            await axios.post(`http://localhost:8080/user/like/${user_id}/${post_id}`, {}, { headers });
+            setLikedStatus((prevStatus) => ({
+                ...prevStatus,
+                [post_id]: true // Update like status for the specific post
+            }));
+            fetchPosts(); // Notify the parent component to refetch the data
+            fetchLikedStatus(postDtos);
+        } catch (error) {
+            console.error("Error liking post:", error);
+        }
+    };
+
+    const unlikePost = async (post_id) => {
+        const token = localStorage.getItem('auth_token');
+        const headers = {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+        };
+
+        try {
+            await axios.delete(`http://localhost:8080/user/unlike/${user_id}/${post_id}`, { headers });
+            setLikedStatus((prevStatus) => ({
+                ...prevStatus,
+                [post_id]: false // Update like status for the specific post
+            }));
+            fetchPosts(); // Notify the parent component to refetch the data
+        } catch (error) {
+            console.error("Error unliking post:", error);
+        }
     };
 
     return (
         <>
-            {postdtos.length > 0 ? (
-                postdtos.map((postdto, index) => (
+            {postDtos.length > 0 ? (
+                postDtos.map((postDto, index) => (
                     <Card key={index} className="mt-3">
                         <Card.Body>
-                            {postdto.user?(
-
-                                <Card.Title onClick={()=>toUserProf(postdto.user.id)} style={{cursor:'pointer'}}>
-                                    <UserImage id={postdto.user.id} size={'60px'} />
-                                    <strong style={{marginLeft:'10px'}}>{postdto.user.firstname} {postdto.user.lastname}</strong>
+                            {postDto.user ? (
+                                <Card.Title onClick={() => toUserProf(postDto.user.id)} style={{cursor: 'pointer'}}>
+                                    <UserImage id={postDto.user.id} size={'60px'}/>
+                                    <strong
+                                        style={{marginLeft: '10px'}}>{postDto.user.firstname} {postDto.user.lastname}</strong>
                                 </Card.Title>
-                            ):(
-
-                                <Card.Title onClick={()=>toCompanyPage(postdto.company.companyId)} style={{cursor:'pointer'}}>
-                                    <CompanyImage companyId={postdto.company.companyId} size={'60px'} />
-                                    <strong style={{marginLeft:'10px'}}>{postdto.company.name}</strong>
+                            ) : (
+                                <Card.Title onClick={() => toCompanyPage(postDto.company.companyId)}
+                                            style={{cursor: 'pointer'}}>
+                                    <CompanyImage companyId={postDto.company.companyId} size={'60px'}/>
+                                    <strong style={{marginLeft: '10px'}}>{postDto.company.name}</strong>
                                 </Card.Title>
                             )}
 
-                            <Card.Text>{postdto.post.content}</Card.Text>
-                            <div>
-                                <FontAwesomeIcon
-                                    icon={faThumbsUp}
-                                    style={{ cursor: "pointer", marginRight: "10px" }}
-                                />
-                                <FontAwesomeIcon
-                                    icon={faComment}
-                                    style={{ cursor: "pointer", marginRight: "10px" }}
-                                />
-                                <FontAwesomeIcon
-                                    icon={faShare}
-                                    style={{ cursor: "pointer", marginRight: "10px" }}
-                                />
+                            <Card.Text>{postDto.post.content}</Card.Text>
+
+                            <div style={{
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "space-between",
+                                width: "200px"
+                            }}>
+                                <div style={{textAlign: "center"}}>
+                                    <FontAwesomeIcon
+                                        icon={faThumbsUp}
+                                        style={{
+                                            cursor: "pointer",
+                                            color: likedStatus[postDto.post.postId] ? "blue" : "black"
+                                        }}
+                                        onClick={() => likedStatus[postDto.post.postId] ? unlikePost(postDto.post.postId) : likePost(postDto.post.postId)}
+                                    />
+                                    <h6>{postDto.post.likes.length}</h6>
+                                </div>
+                                <div style={{textAlign: "center"}}>
+                                    <FontAwesomeIcon
+                                        icon={faComment}
+                                        style={{cursor: "pointer"}}
+                                    />
+                                    <h6>{postDto.comments.length}</h6>
+                                </div>
+                                <div style={{textAlign: "center"}}>
+                                    <FontAwesomeIcon
+                                        icon={faShare}
+                                        style={{cursor: "pointer"}}
+                                    />
+                                    <h6>{postDto.post.shares.length}</h6>
+                                </div>
                             </div>
+
+
                         </Card.Body>
                         {/* Comments section */}
                         <div className="comments-section">
@@ -137,19 +267,19 @@ const Post = ({ initialPostDtos }) => {
                             </div>
                             {/* Existing comments */}
                             <div className="existing-comments mb-2">
-                                {postdto.comments.map((comment, cIndex) => (
+                                {postDto.comments.map((comment, cIndex) => (
                                     <div key={cIndex} className="p-2 border rounded my-1 bg-light">
                                         {/* Display commentator's profile picture */}
-                                        <div className="commentator-info" style={{marginLeft:'10px',cursor:'pointer'}}
-
+                                        <div className="commentator-info" style={{ marginLeft: '10px', cursor: 'pointer' }}
+                                             onClick={() => toUserProf(comment.user.id)}
                                         >
-                                            <UserImage id={comment.user.id} size={'30px'} onClick={()=>toUserProf(comment.user.id)}/>
-                                            <strong style={{marginLeft:'5px'}} onClick={()=>toUserProf(comment.user.id)}>
+                                            <UserImage id={comment.user.id} size={'30px'} />
+                                            <strong style={{ marginLeft: '5px' }}>
                                                 {comment.user.firstname} {comment.user.lastname}
                                             </strong>
                                         </div>
                                         {/* Comment text */}
-                                        <div style={{marginLeft:'10px'}}>{comment.comment.content}</div>
+                                        <div style={{ marginLeft: '10px' }}>{comment.comment.content}</div>
                                     </div>
                                 ))}
                             </div>
@@ -164,3 +294,4 @@ const Post = ({ initialPostDtos }) => {
 };
 
 export default Post;
+
