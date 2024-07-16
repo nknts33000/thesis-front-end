@@ -1,17 +1,20 @@
 // import React, { useEffect, useState } from "react";
-// import {Card, Col, Row} from "react-bootstrap";
+// import { Card, Modal, Button, Form } from "react-bootstrap";
 // import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 // import { faComment, faShare, faThumbsUp } from "@fortawesome/free-solid-svg-icons";
 // import UserImage from "../Images/UserImage";
 // import axios from "axios";
 // import { useNavigate } from "react-router-dom";
 // import CompanyImage from "../Images/CompanyImage";
+// import "bootstrap/dist/css/bootstrap.min.css";
 //
 // const Post = ({ initialPostDtos, fetchPosts }) => {
 //     const [postDtos, setPostDtos] = useState([]); // State variable for posts data
 //     const [newComments, setNewComments] = useState({}); // State variable for new comments
 //     const [likedStatus, setLikedStatus] = useState({}); // State variable for liked status of posts
-//     const [posts, setPosts] = useState([]); // Ensure posts is initialized as an empty array
+//     const [shareModalShow, setShareModalShow] = useState(false); // State variable for modal visibility
+//     const [shareDescription, setShareDescription] = useState(''); // State variable for share description
+//     const [currentPostId, setCurrentPostId] = useState(null); // State variable for current post ID being shared
 //     const user_id = localStorage.getItem('user_id');
 //     const navigate = useNavigate();
 //
@@ -60,8 +63,6 @@
 //             console.error("Error fetching liked status:", error);
 //         }
 //     };
-//
-//
 //
 //     const handleCommentChange = (index, event) => {
 //         const { value } = event.target;
@@ -170,6 +171,34 @@
 //         }
 //     };
 //
+//     const handleShareClick = (post_id) => {
+//         setCurrentPostId(post_id);
+//         setShareModalShow(true);
+//     };
+//
+//     const handleShareDescriptionChange = (event) => {
+//         setShareDescription(event.target.value);
+//     };
+//
+//     const sharePost = async () => {
+//         const token = localStorage.getItem('auth_token');
+//         const headers = {
+//             "Content-Type": "application/json",
+//             "Authorization": `Bearer ${token}`
+//         };
+//
+//         const body = { description: shareDescription };
+//
+//         try {
+//             await axios.post(`http://localhost:8080/user/share/${user_id}/${currentPostId}`, body, { headers });
+//             fetchPosts(); // Notify the parent component to refetch the data
+//             setShareDescription(''); // Clear the description
+//             setShareModalShow(false); // Close the modal
+//         } catch (error) {
+//             console.error("Error sharing post:", error);
+//         }
+//     };
+//
 //     return (
 //         <>
 //             {postDtos.length > 0 ? (
@@ -177,28 +206,23 @@
 //                     <Card key={index} className="mt-3">
 //                         <Card.Body>
 //                             {postDto.user ? (
-//                                 <Card.Title onClick={() => toUserProf(postDto.user.id)} style={{cursor: 'pointer'}}>
-//                                     <UserImage id={postDto.user.id} size={'60px'}/>
-//                                     <strong
-//                                         style={{marginLeft: '10px'}}>{postDto.user.firstname} {postDto.user.lastname}</strong>
+//                                 <Card.Title onClick={() => toUserProf(postDto.user.id)} style={{ cursor: 'pointer' }}>
+//                                     <UserImage id={postDto.user.id} size={'60px'} />
+//                                     <strong style={{ marginLeft: '10px' }}>
+//                                         {postDto.user.firstname} {postDto.user.lastname}
+//                                     </strong>
 //                                 </Card.Title>
 //                             ) : (
-//                                 <Card.Title onClick={() => toCompanyPage(postDto.company.companyId)}
-//                                             style={{cursor: 'pointer'}}>
-//                                     <CompanyImage companyId={postDto.company.companyId} size={'60px'}/>
-//                                     <strong style={{marginLeft: '10px'}}>{postDto.company.name}</strong>
+//                                 <Card.Title onClick={() => toCompanyPage(postDto.company.companyId)} style={{ cursor: 'pointer' }}>
+//                                     <CompanyImage companyId={postDto.company.companyId} size={'60px'} />
+//                                     <strong style={{ marginLeft: '10px' }}>{postDto.company.name}</strong>
 //                                 </Card.Title>
 //                             )}
 //
 //                             <Card.Text>{postDto.post.content}</Card.Text>
 //
-//                             <div style={{
-//                                 display: "flex",
-//                                 alignItems: "center",
-//                                 justifyContent: "space-between",
-//                                 width: "200px"
-//                             }}>
-//                                 <div style={{textAlign: "center"}}>
+//                             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "200px" }}>
+//                                 <div style={{ textAlign: "center" }}>
 //                                     <FontAwesomeIcon
 //                                         icon={faThumbsUp}
 //                                         style={{
@@ -209,23 +233,22 @@
 //                                     />
 //                                     <h6>{postDto.post.likes.length}</h6>
 //                                 </div>
-//                                 <div style={{textAlign: "center"}}>
+//                                 <div style={{ textAlign: "center" }}>
 //                                     <FontAwesomeIcon
 //                                         icon={faComment}
-//                                         style={{cursor: "pointer"}}
+//                                         style={{ cursor: "pointer" }}
 //                                     />
 //                                     <h6>{postDto.comments.length}</h6>
 //                                 </div>
-//                                 <div style={{textAlign: "center"}}>
+//                                 <div style={{ textAlign: "center" }}>
 //                                     <FontAwesomeIcon
 //                                         icon={faShare}
-//                                         style={{cursor: "pointer"}}
+//                                         style={{ cursor: "pointer" }}
+//                                         onClick={() => handleShareClick(postDto.post.postId)}
 //                                     />
 //                                     <h6>{postDto.post.shares.length}</h6>
 //                                 </div>
 //                             </div>
-//
-//
 //                         </Card.Body>
 //                         {/* Comments section */}
 //                         <div className="comments-section">
@@ -263,12 +286,37 @@
 //             ) : (
 //                 <div className="mt-3">No posts yet.</div>
 //             )}
+//
+//             {/* Share Modal */}
+//             <Modal show={shareModalShow} onHide={() => setShareModalShow(false)}>
+//                 <Modal.Header closeButton>
+//                     <Modal.Title>Share Post</Modal.Title>
+//                 </Modal.Header>
+//                 <Modal.Body>
+//                     <Form.Group controlId="shareDescription">
+//                         <Form.Label>Description</Form.Label>
+//                         <Form.Control
+//                             as="textarea"
+//                             rows={3}
+//                             value={shareDescription}
+//                             onChange={handleShareDescriptionChange}
+//                         />
+//                     </Form.Group>
+//                 </Modal.Body>
+//                 <Modal.Footer>
+//                     <Button variant="secondary" onClick={() => setShareModalShow(false)}>
+//                         Close
+//                     </Button>
+//                     <Button variant="primary" onClick={sharePost}>
+//                         Share
+//                     </Button>
+//                 </Modal.Footer>
+//             </Modal>
 //         </>
 //     );
 // };
 //
 // export default Post;
-//
 
 import React, { useEffect, useState } from "react";
 import { Card, Modal, Button, Form } from "react-bootstrap";
@@ -294,7 +342,7 @@ const Post = ({ initialPostDtos, fetchPosts }) => {
         setPostDtos(initialPostDtos);
         console.log('initial company posts:', initialPostDtos);
         fetchLikedStatus(initialPostDtos);
-        console.log('find post')
+        console.log('find post');
     }, [initialPostDtos]);
 
     const fetchLikedStatus = async (posts) => {
@@ -471,6 +519,26 @@ const Post = ({ initialPostDtos, fetchPosts }) => {
         }
     };
 
+    const getCurrentPostDetails = () => {
+        const postDto = postDtos.find(postDto => postDto.post.postId === currentPostId);
+        if (!postDto) return null;
+
+        const userOrCompany = postDto.user
+            ? { type: 'User', name: `${postDto.user.firstname} ${postDto.user.lastname}`, id: postDto.user.id, imageComponent: <UserImage id={postDto.user.id} size={'60px'} /> }
+            : { type: 'Company', name: postDto.company.name, id: postDto.company.companyId, imageComponent: <CompanyImage companyId={postDto.company.companyId} size={'60px'} /> };
+
+        return (
+            <div>
+                <h5>{userOrCompany.type}:</h5>
+                <div onClick={() => userOrCompany.type === 'User' ? toUserProf(userOrCompany.id) : toCompanyPage(userOrCompany.id)} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+                    {userOrCompany.imageComponent}
+                    <strong style={{ marginLeft: '10px' }}>{userOrCompany.name}</strong>
+                </div>
+                <p>{postDto.post.content}</p>
+            </div>
+        );
+    };
+
     return (
         <>
             {postDtos.length > 0 ? (
@@ -565,6 +633,7 @@ const Post = ({ initialPostDtos, fetchPosts }) => {
                     <Modal.Title>Share Post</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
+                    {getCurrentPostDetails()}
                     <Form.Group controlId="shareDescription">
                         <Form.Label>Description</Form.Label>
                         <Form.Control
