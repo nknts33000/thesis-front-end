@@ -1,8 +1,5 @@
- // Register.js
-//import axios from 'axios';
 import React, { useState } from 'react';
 import { Container, Form, Button, Row, Col,Modal } from 'react-bootstrap';
-//import * as url from "url";
 
 function Register() {
     const [email, setEmail] = useState('');
@@ -24,6 +21,17 @@ function Register() {
     const handleModalClose = () => setShow(false);
 
     const registerdto={email,password,firstname,lastname,location}
+
+    const validateEmail = (emailInput) => {
+        const re = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+        return re.test(String(emailInput).toLowerCase());
+    };
+
+    const validatePassword = (passwordInput) => {
+        // Regular expression for strong password validation
+        const re = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/;
+        return re.test(passwordInput);
+    };
 
     const register = async () =>{
 
@@ -51,7 +59,17 @@ function Register() {
     const handleSubmit= (e) => {
         e.preventDefault();
         if(password === repeatpassword){
-            register();
+            if(email && password && repeatpassword && firstname && lastname){
+                if(validateEmail(email)){
+                    if(validatePassword(password)) register();
+                    else handleModalShow('The password isn\'t strong enough.')
+                }
+                else handleModalShow('The email doesn\'t have a proper form.')
+            }
+            else{
+                handleModalShow('Please fill all the mandatory fields')
+            }
+
         }
         else{
             handleModalShow("Please re-enter both passwords to make sure they match.","Passwords don't match");
@@ -66,42 +84,42 @@ function Register() {
                     <h2 className="mb-4">Register</h2>
                     <Form onSubmit={handleSubmit}>
                         <Form.Group controlId="firstname">
-                            <Form.Label>First name</Form.Label>
+                            <Form.Label>First name*</Form.Label>
                             <Form.Control type="text" placeholder="Enter your first name"
                                           onChange={(e) =>
-                                setFirstname(e.target.value)
-                            }/>
+                                              setFirstname(e.target.value.trim())
+                                          }/>
                         </Form.Group>
 
                         <Form.Group controlId="lastname">
-                            <Form.Label>Last name</Form.Label>
+                            <Form.Label>Last name*</Form.Label>
                             <Form.Control type="text" placeholder="Enter your last name"
                                           onChange={(e) =>
-                                              setLastname(e.target.value)
+                                              setLastname(e.target.value.trim())
                                           }/>
                         </Form.Group>
 
                         <Form.Group controlId="emailid">
-                            <Form.Label>Email address</Form.Label>
+                            <Form.Label>Email address*</Form.Label>
                             <Form.Control type="email" placeholder="Enter email(must not be used in another account)"
                                           onChange={(e) =>
-                                              setEmail(e.target.value)
-                                          } />
+                                              setEmail(e.target.value.trim())
+                                          }/>
                         </Form.Group>
 
                         <Form.Group controlId="password">
-                            <Form.Label>Password</Form.Label>
+                            <Form.Label>Password*</Form.Label>
                             <Form.Control type="password" placeholder="Password"
                                           onChange={(e) =>
-                                              setPassword(e.target.value)
+                                              setPassword(e.target.value.trim())
                                           }/>
                         </Form.Group>
 
                         <Form.Group controlId="repeatpassword">
-                            <Form.Label>Password</Form.Label>
+                            <Form.Label>Password*</Form.Label>
                             <Form.Control type="password" placeholder="Repeat password"
                                           onChange={(e) =>
-                                              setRepeatpassword(e.target.value)
+                                              setRepeatpassword(e.target.value.trim())
                                           }/>
                         </Form.Group>
 
@@ -109,17 +127,21 @@ function Register() {
                             <Form.Label>Location</Form.Label>
                             <Form.Control type="text" placeholder="Enter your location(optional)"
                                           onChange={(e) =>
-                                              setLocation(e.target.value)
+                                              setLocation(e.target.value.trim())
                                           }/>
                         </Form.Group>
 
 
-                        <Button variant="primary" type="submit" >
+                        <Button variant="primary" type="submit">
                             Register
                         </Button>
+
                     </Form>
+                    <h5 style={{marginTop: '60px'}}>-The fields that contain "*" are mandatory.</h5>
+                    <h5 style={{marginTop: '10px'}}>-The password should have a length of at least 8 characters and contain at least one small letter, one capital letter, one number and one special character.</h5>
                 </Col>
             </Row>
+
 
             <Modal show={show} onHide={handleModalClose} animation={false}>
                 <Modal.Header closeButton>
