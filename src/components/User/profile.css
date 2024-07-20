@@ -1,0 +1,8 @@
+.friend-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 800px; /* Example width */
+    padding: 10px;
+    box-sizing: border-box;
+}

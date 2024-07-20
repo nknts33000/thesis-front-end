@@ -2,7 +2,9 @@ import React, { useState } from 'react';
 import { Container, Form, Button, Card, ButtonGroup, Image } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import './SearchPage.css'; // Import the custom CSS file
+import './SearchPage.css';
+import UserImage from "../Images/UserImage";
+import CompanyImage from "../Images/CompanyImage"; // Import the custom CSS file
 
 const SearchPage = () => {
     const [searchQuery, setSearchQuery] = useState('');
@@ -90,18 +92,7 @@ const SearchPage = () => {
                                     {searchType === 'users' ? (
                                         <>
                                             <Card.Title>
-                                                <Image
-                                                    variant="top"
-                                                    src={result.profile.pictureUrl ? result.profile.pictureUrl : ""}
-                                                    roundedCircle
-                                                    style={{
-                                                        width: '40px',
-                                                        height: '40px',
-                                                        objectFit: 'cover'
-                                                    }}
-                                                    alt={""}
-                                                    className="card-image"
-                                                />
+                                                <UserImage id={result.id} size={'40px'} />
                                                 {result.firstname} {result.lastname}
                                             </Card.Title>
                                             <Card.Subtitle className="mb-2 text-muted">{result.email}</Card.Subtitle>
@@ -109,18 +100,7 @@ const SearchPage = () => {
                                         </>
                                     ) : (
                                         <>
-                                            <Image
-                                                variant="top"
-                                                src={result.companyLogo ? result.companyLogo : ""}
-                                                roundedCircle
-                                                style={{
-                                                    width: '40px',
-                                                    height: '40px',
-                                                    objectFit: 'cover'
-                                                }}
-                                                alt={""}
-                                                className="card-image"
-                                            />
+                                            <CompanyImage companyId={result.companyId} size={'40px'} />
                                             <Card.Title>{result.name}</Card.Title>
                                             <Card.Text>{result.mission}</Card.Text>
                                         </>

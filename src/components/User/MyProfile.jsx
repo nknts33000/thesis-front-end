@@ -1,13 +1,15 @@
 import React, {useEffect, useRef, useState} from 'react';
-import { Container, Row, Col, Image, Card, Button, Modal, Form } from 'react-bootstrap';
+import {Container, Row, Col, Image, Card, Button, Modal, Form, ButtonGroup} from 'react-bootstrap';
 import {json, useNavigate, useParams} from 'react-router-dom';
 import axios from 'axios';
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faComment, faShare, faThumbsUp, faPencilAlt, faTrash, faPlusCircle} from "@fortawesome/free-solid-svg-icons";
+import {faComment, faShare, faThumbsUp, faPencilAlt, faTrash, faPlusCircle,faUserMinus} from "@fortawesome/free-solid-svg-icons";
 import ChatBox from "../Messages/ChatBox";
 import UserImage from "../Images/UserImage";
 import Post from "../Posts/Post";
-
+import UserCard from "../Cards/UserCard";
+import CompanyCard from "../Cards/CompanyCard";
+import '../User/profile.css';
 const ProfilePage = () => {
     const navigate = useNavigate();
     const [user, setUser] = useState(null);
@@ -33,6 +35,9 @@ const ProfilePage = () => {
     const [content, setContent] = useState('');
     const [isChatOpen, setIsChatOpen] = useState(false);
     const [trigger, setTrigger] = useState(0);
+    const [showType,setShowType]=useState('Posts');
+    const [friends,setFriends]=useState([]);
+    const [followings,setFollowings]=useState([]);
 
 
     useEffect(() => {
@@ -87,6 +92,10 @@ const ProfilePage = () => {
 
             getProfPic();
 
+            getFriends();
+
+            getFollowings();
+
             if(user_id!==id){
                 axios.get(`http://localhost:8080/user/getConnection/${user_id}/${id}`, {
                     headers: {
@@ -110,6 +119,27 @@ const ProfilePage = () => {
 
         }
     }, [user, token]);
+
+
+    const getFriends = async () =>{
+        axios.get(`http://localhost:8080/user/getAllFriends/${user.id}`, { headers: { "Content-Type": "Application/Json", Authorization: `Bearer ${token}` } })
+            .then(response => {
+                setFriends(response.data);
+            })
+            .catch(error => {
+                console.error("There was an error fetching the friends!", error);
+            });
+    };
+
+    const getFollowings = async () =>{
+        axios.get(`http://localhost:8080/user/getAllFollowings/${user.id}`, { headers: { "Content-Type": "Application/Json", Authorization: `Bearer ${token}` } })
+            .then(response => {
+                setFollowings(response.data);
+            })
+            .catch(error => {
+                console.error("There was an error fetching the friends!", error);
+            });
+    };
 
     const toggleChatBox = () => {
         setIsChatOpen(!isChatOpen);
@@ -476,6 +506,16 @@ const ProfilePage = () => {
             });
     };
 
+    const deleteSpecificFriend = async (idparam) =>{
+        axios.delete(`http://localhost:8080/user/delete_friend/${user_id}/${idparam}`, { headers: { "Content-Type": "Application/Json", Authorization: `Bearer ${token}` } })
+            .then(response => {
+                setConnection({...connection,connection_status:''});
+            })
+            .catch(error => {
+                console.error("There was an error cancelling the friend request!", error);
+            });
+    };
+
     const acceptFriendRequest = async () =>{
         axios.put(`http://localhost:8080/user/accept_friend/${user_id}/${id}`,{}, { headers: { "Content-Type": "Application/Json", Authorization: `Bearer ${token}` } })
             .then(response => {
@@ -521,6 +561,20 @@ const ProfilePage = () => {
     };
 
 
+    const renderFriendCard = (friend) => (
+            <>
+
+                <UserCard user={friend} />
+
+            </>
+    );
+
+    const renderFollowingCard = (following) => (
+
+        <CompanyCard company={following} />
+    );
+
+
 
     if (!profile) {
         return <div>Loading...</div>;
@@ -538,80 +592,75 @@ const ProfilePage = () => {
                                 trigger={trigger}
                             />
 
-                            { user_id===id &&
+                            {user_id === id &&
                                 <>
-                                    <FontAwesomeIcon icon={faPlusCircle} size="lg" className="ml-2" onClick={handleImageClick} style={{cursor:'pointer'}}/>
+                                    <FontAwesomeIcon icon={faPlusCircle} size="lg" className="ml-2"
+                                                     onClick={handleImageClick} style={{cursor: 'pointer'}}/>
                                     <input
-                                    type="file"
-                                    accept="image/*"
-                                    ref={fileInputRef}
-                                    style={{display: 'none'}}
-                                    onChange={handleFileChange}
+                                        type="file"
+                                        accept="image/*"
+                                        ref={fileInputRef}
+                                        style={{display: 'none'}}
+                                        onChange={handleFileChange}
                                     />
                                 </>
                             }
 
                             {
-                                user_id!==id &&
+                                user_id !== id &&
 
                                 <>
-                                    <Button variant="success" onClick={toggleChatBox} style={{ marginLeft: '10px' }}>
+                                    <Button variant="success" onClick={toggleChatBox} style={{marginLeft: '10px'}}>
                                         Chat
                                     </Button>
                                 </>
                             }
 
-                                <Card.Title style={{marginLeft:"15px"}}>{user.firstname + " " + user.lastname}</Card.Title>
-                            {/*{ user_id!==id &&*/}
-                            {/*    <Button variant="primary" type="submit"  style={{marginLeft:'15px'}}>*/}
-                            {/*        Add Friend*/}
-                            {/*    </Button>*/}
-                            {/*}*/}
-
+                            <Card.Title style={{marginLeft: "15px"}}>{user.firstname + " " + user.lastname}</Card.Title>
                             {user_id !== id && connection && (
-                                // connection.connection_status === 'no_connection' ? (
-                                //     <Button variant="primary" type="submit" style={{ marginLeft: '15px' }}>
-                                //         Add Friend
-                                //     </Button>
-                                // ) :
-                                    connection.connection_status === 'Pending' ? (
-                                        connection.user1.id==user_id // == because they're not of the same type. one is string another is long/bigint
-                                            ?(
-                                            <Button variant="secondary" style={{ marginLeft: '15px' }} onClick={cancelRequest}>
+                                connection.connection_status === 'Pending' ? (
+                                    connection.user1.id == user_id // == because they're not of the same type. one is string another is long/bigint
+                                        ? (
+                                            <Button variant="secondary" style={{marginLeft: '15px'}}
+                                                    onClick={cancelRequest}>
                                                 Cancel Friend Request
                                             </Button>
-                                        ) :(
+                                        ) : (
                                             <>
-                                                <Button variant="secondary" style={{ marginLeft: '15px' }} onClick={acceptFriendRequest}>
+                                                <Button variant="secondary" style={{marginLeft: '15px'}}
+                                                        onClick={acceptFriendRequest}>
                                                     Accept Friend Request
                                                 </Button>
-                                                <Button variant="secondary" style={{ marginLeft: '15px' }} onClick={rejectFriendRequest}>
+                                                <Button variant="secondary" style={{marginLeft: '15px'}}
+                                                        onClick={rejectFriendRequest}>
                                                     Reject Friend Request
                                                 </Button>
                                             </>
                                         )
 
                                 ) : connection.connection_status === 'Friends' ? (
-                                    <Button variant="success" style={{ marginLeft: '15px' }} onClick={deleteFriend}>
+                                    <Button variant="success" style={{marginLeft: '15px'}} onClick={deleteFriend}>
                                         Delete Friend
                                     </Button>
-                                ) :(
-                                    <Button variant="primary" type="submit" style={{ marginLeft: '15px' }} onClick={addFriend}>
+                                ) : (
+                                    <Button variant="primary" type="submit" style={{marginLeft: '15px'}}
+                                            onClick={addFriend}>
                                         Add Friend
                                     </Button>
                                 )
-                            ) }
+                            )}
 
                             <Card.Text>{profile.headline}</Card.Text>
                             <Card.Text><small className="text-muted">{profile.industry}</small></Card.Text>
                         </Card.Body>
                     </Card>
-                    <Card style={{marginTop:'15px',width:'250%'}}>
+                    <Card style={{marginTop: '15px', width: '250%'}}>
                         <Card.Body>
                             <Card.Title>About Me
 
-                                {user_id===id &&
-                                    <FontAwesomeIcon icon={faPencilAlt} className="ml-2" style={{ cursor: 'pointer' }} onClick={() => setShowAboutMeModal(true)} />
+                                {user_id === id &&
+                                    <FontAwesomeIcon icon={faPencilAlt} className="ml-2" style={{cursor: 'pointer'}}
+                                                     onClick={() => setShowAboutMeModal(true)}/>
                                 }
                             </Card.Title>
                             <Card.Text>{profile.summary}</Card.Text>
@@ -625,19 +674,21 @@ const ProfilePage = () => {
                     <Card>
                         <Card.Body>
                             <Card.Title>Experience</Card.Title>
-                            { user_id===id &&
+                            {user_id === id &&
                                 <Button onClick={() => handleShowExpModal()}>Add Experience</Button>
                             }
                             {experiences.length > 0 ? experiences.map(exp => (
                                 <div key={exp.experience_id}>
                                     <h5>{exp.title}
-                                        <FontAwesomeIcon icon={faPencilAlt} className="ml-2" style={{ cursor: 'pointer' }} onClick={() => handleShowExpModal(exp)} />
-                                        <FontAwesomeIcon icon={faTrash} className="ml-2" style={{ cursor: 'pointer' }} onClick={() => handleDeleteExperience(exp.experience_id)} />
+                                        <FontAwesomeIcon icon={faPencilAlt} className="ml-2" style={{cursor: 'pointer'}}
+                                                         onClick={() => handleShowExpModal(exp)}/>
+                                        <FontAwesomeIcon icon={faTrash} className="ml-2" style={{cursor: 'pointer'}}
+                                                         onClick={() => handleDeleteExperience(exp.experience_id)}/>
                                     </h5>
                                     <p>{exp.company_name}</p>
                                     <p>{exp.location}</p>
                                     <p>{new Date(exp.start_date).toLocaleDateString()} - {new Date(exp.end_date).toLocaleDateString()}</p>
-                                    <hr />
+                                    <hr/>
                                 </div>
                             )) : (<div><h5>No experiences added.</h5></div>)}
                         </Card.Body>
@@ -649,19 +700,21 @@ const ProfilePage = () => {
                     <Card>
                         <Card.Body>
                             <Card.Title>Education</Card.Title>
-                            {user_id===id &&
+                            {user_id === id &&
                                 <Button onClick={() => handleShowEduModal()}>Add Education</Button>
                             }
                             {education.length > 0 ? education.map(edu => (
                                 <div key={edu.education_id}>
                                     <h5>
                                         {edu.degree} in {edu.field_of_study}
-                                        <FontAwesomeIcon icon={faPencilAlt} className="ml-2" style={{ cursor: 'pointer' }} onClick={() => handleShowEduModal(edu)} />
-                                        <FontAwesomeIcon icon={faTrash} className="ml-2" style={{ cursor: 'pointer' }} onClick={() => handleDeleteEducation(edu.education_id)} />
+                                        <FontAwesomeIcon icon={faPencilAlt} className="ml-2" style={{cursor: 'pointer'}}
+                                                         onClick={() => handleShowEduModal(edu)}/>
+                                        <FontAwesomeIcon icon={faTrash} className="ml-2" style={{cursor: 'pointer'}}
+                                                         onClick={() => handleDeleteEducation(edu.education_id)}/>
                                     </h5>
                                     <p>{edu.school_name}</p>
                                     <p>{new Date(edu.start_date).toLocaleDateString()} - {new Date(edu.end_date).toLocaleDateString()}</p>
-                                    <hr />
+                                    <hr/>
                                 </div>
                             )) : (<div><h5>No education added.</h5></div>)}
                         </Card.Body>
@@ -669,19 +722,76 @@ const ProfilePage = () => {
                 </Col>
             </Row>
 
+
+            <ButtonGroup className="mb-3" style={{marginTop:'20px'}}>
+                <Button
+                    className="custom-button"
+                    variant={showType === 'Posts' ? "primary" : "outline-primary"}
+                    onClick={() => setShowType('Posts')}
+                >
+                    Posts
+                </Button>
+                <Button
+                    className="custom-button"
+                    variant={showType === 'Friends' ? "primary" : "outline-primary"}
+                    onClick={() => setShowType('Friends')}
+                >
+                    Friends
+                </Button>
+                <Button
+                    className="custom-button"
+                    variant={showType === 'Followings' ? "primary" : "outline-primary"}
+                    onClick={() => setShowType('Followings')}
+                >
+                    Followings
+                </Button>
+            </ButtonGroup>
             <hr/>
 
+            {showType==='Posts'&&(
 
-            {user_id===id &&
-                <Button variant="primary" onClick={handleShowModal}>New post</Button>
-            }
+                <>
+                    {user_id === id &&
+                        <Button variant="primary" onClick={handleShowModal}>New post</Button>
+                    }
 
-            <Row className="mt-4">
-                <Col xs={12}>
+                    <Row className="mt-4">
+                        <Col xs={12}>
 
-                    <Post initialPostDtos={posts} fetchPosts={getPosts}/>
-                </Col>
-            </Row>
+                            <Post initialPostDtos={posts} fetchPosts={getPosts}/>
+                        </Col>
+                    </Row>
+                </>
+
+            )}
+            {showType==='Friends'&&(
+                <>
+                    {friends.map(friend => renderFriendCard(friend))}
+                    <br/>
+                    <br/>
+                    <br/>
+                    <br/>
+                    <br/>
+                    <br/>
+                    <br/>
+                    <br/>
+                    <br/>
+                </>
+            )}
+            {showType === 'Followings' && (
+                <>
+                    {followings.map(following => renderFollowingCard(following))}
+                    <br/>
+                    <br/>
+                    <br/>
+                    <br/>
+                    <br/>
+                    <br/>
+                    <br/>
+                    <br/>
+                    <br/>
+                </>
+            )}
 
 
             {/* ChatBox Component */}
@@ -711,11 +821,13 @@ const ProfilePage = () => {
                         </Form.Group>
                         <Form.Group controlId="formExperienceStartDate">
                             <Form.Label>Start Date</Form.Label>
-                            <Form.Control type="date" placeholder="Enter start date" value={currentExp.start_date || ''} onChange={e => setCurrentExp({ ...currentExp, start_date: e.target.value })} />
+                            <Form.Control type="date" placeholder="Enter start date" value={currentExp.start_date || ''}
+                                          onChange={e => setCurrentExp({...currentExp, start_date: e.target.value})}/>
                         </Form.Group>
                         <Form.Group controlId="formExperienceEndDate">
                             <Form.Label>End Date</Form.Label>
-                            <Form.Control type="date" placeholder="Enter end date" value={currentExp.end_date || ''} onChange={e => setCurrentExp({ ...currentExp, end_date: e.target.value })} />
+                            <Form.Control type="date" placeholder="Enter end date" value={currentExp.end_date || ''}
+                                          onChange={e => setCurrentExp({...currentExp, end_date: e.target.value})}/>
                         </Form.Group>
 
                     </Form>
@@ -733,23 +845,33 @@ const ProfilePage = () => {
                     <Form>
                         <Form.Group controlId="formEducationDegree">
                             <Form.Label>Degree</Form.Label>
-                            <Form.Control type="text" placeholder="Enter degree(Bachelor's, Master's etc.)" value={currentEdu.degree || ''} onChange={e => setCurrentEdu({ ...currentEdu, degree: e.target.value })} />
+                            <Form.Control type="text" placeholder="Enter degree(Bachelor's, Master's etc.)"
+                                          value={currentEdu.degree || ''}
+                                          onChange={e => setCurrentEdu({...currentEdu, degree: e.target.value})}/>
                         </Form.Group>
                         <Form.Group controlId="formEducationField">
                             <Form.Label>Field of Study</Form.Label>
-                            <Form.Control type="text" placeholder="Enter field of study" value={currentEdu.field_of_study || ''} onChange={e => setCurrentEdu({ ...currentEdu, field_of_study: e.target.value })} />
+                            <Form.Control type="text" placeholder="Enter field of study"
+                                          value={currentEdu.field_of_study || ''} onChange={e => setCurrentEdu({
+                                ...currentEdu,
+                                field_of_study: e.target.value
+                            })}/>
                         </Form.Group>
                         <Form.Group controlId="formEducationSchool">
                             <Form.Label>School Name</Form.Label>
-                            <Form.Control type="text" placeholder="Enter school name" value={currentEdu.school_name || ''} onChange={e => setCurrentEdu({ ...currentEdu, school_name: e.target.value })} />
+                            <Form.Control type="text" placeholder="Enter school name"
+                                          value={currentEdu.school_name || ''}
+                                          onChange={e => setCurrentEdu({...currentEdu, school_name: e.target.value})}/>
                         </Form.Group>
                         <Form.Group controlId="formEducationStartDate">
                             <Form.Label>Start Date</Form.Label>
-                            <Form.Control type="date" placeholder="Enter start date" value={currentEdu.start_date || ''} onChange={e => setCurrentEdu({ ...currentEdu, start_date: e.target.value })} />
+                            <Form.Control type="date" placeholder="Enter start date" value={currentEdu.start_date || ''}
+                                          onChange={e => setCurrentEdu({...currentEdu, start_date: e.target.value})}/>
                         </Form.Group>
                         <Form.Group controlId="formEducationEndDate">
                             <Form.Label>End Date</Form.Label>
-                            <Form.Control type="date" placeholder="Enter end date" value={currentEdu.end_date || ''} onChange={e => setCurrentEdu({ ...currentEdu, end_date: e.target.value })} />
+                            <Form.Control type="date" placeholder="Enter end date" value={currentEdu.end_date || ''}
+                                          onChange={e => setCurrentEdu({...currentEdu, end_date: e.target.value})}/>
                         </Form.Group>
                     </Form>
                 </Modal.Body>

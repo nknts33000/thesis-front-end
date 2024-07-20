@@ -32,10 +32,10 @@ import CompanyProfile from "./components/Company/CompanyProfile";
 import MyProfile from "./components/User/MyProfile";
 import ApplicantsPage from "./components/Advert/Applicants";
 import ChatBox from "./components/Messages/ChatBox";
-// import MessagesModal from './components/Messages/MessagesModal';
 import './components/Messages/Chatbox.css';
 import Conversations from "./components/Messages/Conversations";
 import FriendRequestsModal from "./components/Requests/FriendRequestsModal";
+import SettingsPage from "./components/Settings/SettingsPage";
 
 function App() {
     return (
@@ -178,7 +178,7 @@ function Main() {
                                                 >Profile</Dropdown.Item>
                                                 <Dropdown.Item onClick={() => navigate('/companies')}>My
                                                     Companies</Dropdown.Item>
-                                                <Dropdown.Item onClick={handleLogout}>Logout</Dropdown.Item>
+                                                <Dropdown.Item onClick={()=>navigate('/settings')}>Settings</Dropdown.Item>
                                             </Dropdown.Menu>
                                         </Dropdown>
                                     </div>
@@ -187,17 +187,7 @@ function Main() {
                         </Nav>
                     </Navbar.Collapse>
                 </Container>
-                {/*<Modal show={friendListModal} onHide={handleCloseFriendListModal}>*/}
-                {/*    <Modal.Header closeButton>*/}
-                {/*        <Modal.Title>Friend Requests</Modal.Title>*/}
-                {/*    </Modal.Header>*/}
-                {/*    <Modal.Body>*/}
-                {/*        <p>List of friend requests...</p>*/}
-                {/*    </Modal.Body>*/}
-                {/*    <Modal.Footer>*/}
-                {/*        <Button variant="secondary" onClick={handleCloseFriendListModal}>Close</Button>*/}
-                {/*    </Modal.Footer>*/}
-                {/*</Modal>*/}
+
             </Navbar>
 
 
@@ -226,6 +216,7 @@ function Main() {
                     <Route path="/user/:id" element={<MyProfile/>}/>
                     <Route path="/company/:companyId" element={<CompanyProfile/>}/>
                     <Route path="/applicants/:advertId" element={<ApplicantsPage/>}/>
+                    <Route path="/settings" element={<SettingsPage/>}/>
                 </Routes>
             </div>
         </>

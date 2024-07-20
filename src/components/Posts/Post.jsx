@@ -25,7 +25,6 @@ const Post = ({ initialPostDtos, fetchPosts }) => {
         setPostDtos(initialPostDtos);
         fetchLikedStatus(initialPostDtos);
         fetchAdministeredCompanies();
-        console.log('administered companies',administeredCompanies);
     }, [initialPostDtos]);
 
     const fetchLikedStatus = async (posts) => {
@@ -277,12 +276,6 @@ const Post = ({ initialPostDtos, fetchPosts }) => {
                                             </div>
                                         </div>
                                     ) : (
-                                        // <div onClick={() => toCompanyPage(postDto.share.company.companyId)}
-                                        //      style={{cursor: 'pointer', display: 'flex', alignItems: 'center'}}>
-                                        //     <CompanyImage companyId={postDto.share.company.companyId} size={'60px'}/>
-                                        //     <strong style={{marginLeft: '10px'}}>{postDto.share.company.name} <h5>shared a post</h5></strong>
-                                        //     <p>{postDto.share.description}</p>
-                                        // </div>
 
                                         <div onClick={() => toCompanyPage(postDto.share.company.companyId)} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
                                             <CompanyImage companyId={postDto.share.company.companyId} size={'60px'}/>
@@ -466,52 +459,6 @@ const Post = ({ initialPostDtos, fetchPosts }) => {
             ) : (
                 <div className="mt-3">No posts yet.</div>
             )}
-
-            {/*<Modal show={shareModalShow} onHide={() => setShareModalShow(false)}>*/}
-            {/*    <Modal.Header closeButton>*/}
-            {/*        <Modal.Title>Share Post</Modal.Title>*/}
-            {/*    </Modal.Header>*/}
-            {/*    <Modal.Body>*/}
-            {/*        <Form.Group controlId="shareDescription">*/}
-            {/*            <Form.Label>Description</Form.Label>*/}
-            {/*            <Form.Control*/}
-            {/*                as="textarea"*/}
-            {/*                rows={3}*/}
-            {/*                value={shareDescription}*/}
-            {/*                onChange={handleShareDescriptionChange}*/}
-            {/*            />*/}
-            {/*        </Form.Group>*/}
-            {/*        <Form.Group controlId="shareOnBehalfOfCompany">*/}
-            {/*            <Form.Check*/}
-            {/*                type="checkbox"*/}
-            {/*                label="Share on behalf of company"*/}
-            {/*                checked={shareOnBehalfOfCompany}*/}
-            {/*                onChange={handleCheckboxChange}*/}
-            {/*                */}
-            {/*            />*/}
-            {/*        </Form.Group>*/}
-            {/*        {shareOnBehalfOfCompany && (*/}
-            {/*            <Form.Group controlId="selectCompany">*/}
-            {/*                <Form.Label>Select a company</Form.Label>*/}
-            {/*                <Form.Control as="select" value={selectedCompanyId} onChange={handleCompanyChange}>*/}
-            {/*                    <option value="">Select a company</option>*/}
-            {/*                    {administeredCompanies.map((company) => (*/}
-            {/*                        <option key={company.companyId} value={company.companyId}>{company.name}</option>*/}
-            {/*                    ))}*/}
-            {/*                </Form.Control>*/}
-            {/*            </Form.Group>*/}
-            {/*        )}*/}
-            {/*        {getCurrentPostDetails()}*/}
-            {/*    </Modal.Body>*/}
-            {/*    <Modal.Footer>*/}
-            {/*        <Button variant="secondary" onClick={() => setShareModalShow(false)}>*/}
-            {/*            Close*/}
-            {/*        </Button>*/}
-            {/*        <Button variant="primary" onClick={sharePost}>*/}
-            {/*            Share*/}
-            {/*        </Button>*/}
-            {/*    </Modal.Footer>*/}
-            {/*</Modal>*/}
 
             <Modal show={shareModalShow} onHide={() => setShareModalShow(false)}>
                 <Modal.Header closeButton>
