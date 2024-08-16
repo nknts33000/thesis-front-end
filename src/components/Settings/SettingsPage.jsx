@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Container, Row, Col, Form, Button, Tab, Nav } from 'react-bootstrap';
+import axios from "axios";
 
 const SettingsPage = () => {
     const [email, setEmail] = useState('');
@@ -7,6 +8,8 @@ const SettingsPage = () => {
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
     const [location, setLocation] = useState('');
+    const [repeatPassword,setRepeatPassword]=useState('');
+    const user_id=localStorage.getItem('user_id');
     const [notifications, setNotifications] = useState({
         email: true,
         push: true,
@@ -19,9 +22,80 @@ const SettingsPage = () => {
         messageSettings: 'everyone',
     });
 
+    const handlePut = (url,settingName,body) =>{
+        // const res=
+            axios.put(
+                url,
+                JSON.stringify(body),
+            {
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${localStorage.getItem('auth_token')}`
+                }
+            }
+        )
+            .then(response => {
+                if(response.status===200) alert('Updated successfully');
+                if(settingName==='email') localStorage.setItem('auth_token',response.data);
+            })
+            .catch(error => {
+                console.error("Error updating:", error);
+            });
+
+        // return res;
+    };
+
+    const validateEmail = (emailInput) => {
+        const re = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+        return re.test(String(emailInput).toLowerCase());
+    };
+
+    const validatePassword = (passwordInput) => {
+        // Regular expression for strong password validation
+        const re = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/;
+        return re.test(passwordInput);
+    };
+
     const handleSave = (settingName) => {
-        // Save the specific setting to the backend
-        console.log(`Saving ${settingName}`);
+        // // Save the specific setting to the backend
+        // console.log(`Saving ${settingName}`);
+        switch (settingName){
+            case 'email':
+                if(validateEmail(email)){
+                    handlePut(`http://localhost:8080/user/changeEmail/${user_id}`,'email',{email:email});
+                }
+                else alert('improper email address');
+                setEmail('');
+                return;
+            case 'password':
+                console.log('new pass:',password)
+                if(password===repeatPassword && validatePassword(password)) handlePut(`http://localhost:8080/user/changePassword/${user_id}`,'password',{password:password});
+                else {
+                    if(password===repeatPassword) alert('Password not strong enough! Follow instructions!')
+                    else alert('The passwords don\'t match!')
+                }
+                setPassword('');
+                setRepeatPassword('');
+                return;
+            case 'firstName':
+                if(firstName.trim()!=='')handlePut(`http://localhost:8080/user/changeFirstname/${user_id}`,'firstName',{firstName:firstName});
+                else alert('input should not be empty')
+                setFirstName('');
+                return;
+            case 'lastName':
+                if(lastName.trim()!=='')handlePut(`http://localhost:8080/user/changeLastname/${user_id}`,'lastName',{lastName:lastName});
+                else alert('input should not be empty')
+                setLastName('');
+                return;
+            case 'location':
+                if(location.trim()!=='')handlePut(`http://localhost:8080/user/changeLocation/${user_id}`,'location',{location:location});
+                else alert('input should not be empty')
+                setLocation('');
+                return;
+            default:
+                return;
+        }
+
     };
 
     return (
@@ -75,6 +149,12 @@ const SettingsPage = () => {
                                                     placeholder="Password"
                                                     value={password}
                                                     onChange={(e) => setPassword(e.target.value)}
+                                                />
+                                                <Form.Control
+                                                    type="password"
+                                                    placeholder="Repeat password"
+                                                    value={repeatPassword}
+                                                    onChange={(e) => setRepeatPassword(e.target.value)}
                                                 />
                                             </Col>
                                             <Col xs="auto">
@@ -148,7 +228,10 @@ const SettingsPage = () => {
                                         <Form.Control
                                             as="select"
                                             value={privacy.profileVisibility}
-                                            onChange={(e) => setPrivacy({ ...privacy, profileVisibility: e.target.value })}
+                                            onChange={(e) => setPrivacy({
+                                                ...privacy,
+                                                profileVisibility: e.target.value
+                                            })}
                                         >
                                             <option value="public">Public</option>
                                             <option value="connections">Connections Only</option>
@@ -160,7 +243,10 @@ const SettingsPage = () => {
                                         <Form.Control
                                             as="select"
                                             value={privacy.connectionRequests}
-                                            onChange={(e) => setPrivacy({ ...privacy, connectionRequests: e.target.value })}
+                                            onChange={(e) => setPrivacy({
+                                                ...privacy,
+                                                connectionRequests: e.target.value
+                                            })}
                                         >
                                             <option value="everyone">Everyone</option>
                                             <option value="friendsOfFriends">Friends of Friends</option>
@@ -172,7 +258,7 @@ const SettingsPage = () => {
                                             type="checkbox"
                                             label="Show Activity Status"
                                             checked={privacy.activityStatus}
-                                            onChange={(e) => setPrivacy({ ...privacy, activityStatus: e.target.checked })}
+                                            onChange={(e) => setPrivacy({...privacy, activityStatus: e.target.checked})}
                                         />
                                     </Form.Group>
                                     <Form.Group controlId="formMessageSettings">
@@ -180,7 +266,7 @@ const SettingsPage = () => {
                                         <Form.Control
                                             as="select"
                                             value={privacy.messageSettings}
-                                            onChange={(e) => setPrivacy({ ...privacy, messageSettings: e.target.value })}
+                                            onChange={(e) => setPrivacy({...privacy, messageSettings: e.target.value})}
                                         >
                                             <option value="everyone">Everyone</option>
                                             <option value="connections">Connections Only</option>
@@ -197,12 +283,20 @@ const SettingsPage = () => {
                                 <Button variant="danger" onClick={() => alert('Delete Account')}>
                                     Delete Account
                                 </Button>
-                                <Button variant="secondary" onClick={() => alert('Deactivate Account')} className="ml-2">
+                                <Button variant="secondary" onClick={() => alert('Deactivate Account')}
+                                        className="ml-2">
                                     Deactivate Account
                                 </Button>
                             </Tab.Pane>
 
                         </Tab.Content>
+                        <br/>
+                        <br/>
+                        <br/>
+                        <h5 style={{marginTop: '10px'}}>The password should have a length of at least 8 characters and
+                            contain at least one small letter, one capital letter, one number and one special
+                            character.</h5>
+
                     </Col>
                 </Row>
             </Tab.Container>

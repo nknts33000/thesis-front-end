@@ -538,16 +538,20 @@ const ProfilePage = () => {
 
         const body = { "content":content, "token":token };
         const url = 'http://localhost:8080/user/post';
-        await fetch(url, {
-            method: 'POST',
-            headers: headers,
-            body: JSON.stringify(body)
-        }).then(()=>{
-            getPosts();
-        }).catch((err) => {
-            console.log(err);
-        });
-        handleCloseModal();
+        if(content.trim()!==''){
+            await fetch(url, {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify(body)
+            }).then(()=>{
+                getPosts();
+            }).catch((err) => {
+                console.log(err);
+            });
+            handleCloseModal();
+        }
+        else alert('Post can\'t be empty.')
+
     };
 
     const rejectFriendRequest =async ()=>{
@@ -606,17 +610,28 @@ const ProfilePage = () => {
                                 </>
                             }
 
-                            {
-                                user_id !== id &&
+                            {/*{*/}
+                            {/*    user_id !== id &&*/}
 
-                                <>
-                                    <Button variant="success" onClick={toggleChatBox} style={{marginLeft: '10px'}}>
-                                        Chat
-                                    </Button>
-                                </>
-                            }
+                            {/*    <>*/}
+                            {/*        <Button variant="success" onClick={toggleChatBox} style={{marginLeft: '10px'}}>*/}
+                            {/*            Chat*/}
+                            {/*        </Button>*/}
+                            {/*    </>*/}
+                            {/*}*/}
 
-                            <Card.Title style={{marginLeft: "15px"}}>{user.firstname + " " + user.lastname}</Card.Title>
+                            <Card.Title style={{marginLeft: "15px"}}>
+                                {user.firstname + " " + user.lastname}
+                                {
+                                    user_id !== id &&
+
+                                    <>
+                                        <Button variant="success" onClick={toggleChatBox} style={{marginLeft: '10px'}}>
+                                            Chat
+                                        </Button>
+                                    </>
+                                }
+                            </Card.Title>
                             {user_id !== id && connection && (
                                 connection.connection_status === 'Pending' ? (
                                     connection.user1.id == user_id // == because they're not of the same type. one is string another is long/bigint
@@ -680,10 +695,15 @@ const ProfilePage = () => {
                             {experiences.length > 0 ? experiences.map(exp => (
                                 <div key={exp.experience_id}>
                                     <h5>{exp.title}
-                                        <FontAwesomeIcon icon={faPencilAlt} className="ml-2" style={{cursor: 'pointer'}}
-                                                         onClick={() => handleShowExpModal(exp)}/>
-                                        <FontAwesomeIcon icon={faTrash} className="ml-2" style={{cursor: 'pointer'}}
-                                                         onClick={() => handleDeleteExperience(exp.experience_id)}/>
+                                        {user_id===id &&
+
+                                            <>
+                                                <FontAwesomeIcon icon={faPencilAlt} className="ml-2" style={{cursor: 'pointer'}}
+                                                                 onClick={() => handleShowExpModal(exp)}/>
+                                                <FontAwesomeIcon icon={faTrash} className="ml-2" style={{cursor: 'pointer'}}
+                                                                 onClick={() => handleDeleteExperience(exp.experience_id)}/>
+                                            </>
+                                        }
                                     </h5>
                                     <p>{exp.company_name}</p>
                                     <p>{exp.location}</p>
@@ -707,10 +727,15 @@ const ProfilePage = () => {
                                 <div key={edu.education_id}>
                                     <h5>
                                         {edu.degree} in {edu.field_of_study}
-                                        <FontAwesomeIcon icon={faPencilAlt} className="ml-2" style={{cursor: 'pointer'}}
-                                                         onClick={() => handleShowEduModal(edu)}/>
-                                        <FontAwesomeIcon icon={faTrash} className="ml-2" style={{cursor: 'pointer'}}
-                                                         onClick={() => handleDeleteEducation(edu.education_id)}/>
+                                        {user_id===id &&
+                                            <>
+                                                <FontAwesomeIcon icon={faPencilAlt} className="ml-2" style={{cursor: 'pointer'}}
+                                                                 onClick={() => handleShowEduModal(edu)}/>
+                                                <FontAwesomeIcon icon={faTrash} className="ml-2" style={{cursor: 'pointer'}}
+                                                                 onClick={() => handleDeleteEducation(edu.education_id)}/>
+                                            </>
+                                        }
+
                                     </h5>
                                     <p>{edu.school_name}</p>
                                     <p>{new Date(edu.start_date).toLocaleDateString()} - {new Date(edu.end_date).toLocaleDateString()}</p>
