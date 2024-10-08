@@ -71,22 +71,27 @@ const ProfilePage = () => {
 
             getProfile();
 
-            axios.get(`http://localhost:8080/user/getExperiences/${user.id}`, { headers: { "Content-Type": "Application/Json", Authorization: `Bearer ${token}` } })
-                .then(response => {
-                    setExperiences(response.data);
-                    console.log('experiences:'+response.data)
-                })
-                .catch(error => {
-                    console.error("There was an error fetching the experiences!", error);
-                });
+            // axios.get(`http://localhost:8080/user/getExperiences/${user.id}`, { headers: { "Content-Type": "Application/Json", Authorization: `Bearer ${token}` } })
+            //     .then(response => {
+            //         setExperiences(response.data);
+            //         console.log('experience start:'+response.data.start_date)
+            //         console.log('experience end:'+response.data.end_date)
+            //     })
+            //     .catch(error => {
+            //         console.error("There was an error fetching the experiences!", error);
+            //     });
 
-            axios.get(`http://localhost:8080/user/getEducation/${user.id}`, { headers: { "Content-Type": "Application/Json", Authorization: `Bearer ${token}` } })
-                .then(response => {
-                    setEducation(response.data);
-                })
-                .catch(error => {
-                    console.error("There was an error fetching the education!", error);
-                });
+            getEx();
+
+            // axios.get(`http://localhost:8080/user/getEducation/${user.id}`, { headers: { "Content-Type": "Application/Json", Authorization: `Bearer ${token}` } })
+            //     .then(response => {
+            //         setEducation(response.data);
+            //     })
+            //     .catch(error => {
+            //         console.error("There was an error fetching the education!", error);
+            //     });
+
+            getEd();
 
             getPosts();
 
@@ -121,6 +126,16 @@ const ProfilePage = () => {
     }, [user, token]);
 
 
+    const convertTimestampToDate = (timestamp) => {
+        if (!timestamp) return ''; // Return an empty string if timestamp is not set
+        const date = new Date(timestamp); // Create a Date object from the timestamp
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0'); // Add leading zero if needed
+        const day = String(date.getDate()).padStart(2, '0'); // Add leading zero if needed
+        return `${year}-${month}-${day}`; // Format as YYYY-MM-DD
+    };
+
+
     const getFriends = async () =>{
         axios.get(`http://localhost:8080/user/getAllFriends/${user.id}`, { headers: { "Content-Type": "Application/Json", Authorization: `Bearer ${token}` } })
             .then(response => {
@@ -148,8 +163,9 @@ const ProfilePage = () => {
     const getPosts=async ()=>{
         axios.get(`http://localhost:8080/user/getPosts/${user.id}`, { headers: { "Content-Type": "Application/Json", Authorization: `Bearer ${token}` } })
             .then(response => {
-                setPosts(response.data);
                 console.log(response.data)
+                setPosts(response.data);
+
             })
             .catch(error => {
                 console.error("There was an error fetching the posts!", error);
@@ -188,7 +204,12 @@ const ProfilePage = () => {
     const getEd = async () => {
         axios.get(`http://localhost:8080/user/getEducation/${user.id}`, { headers: { "Content-Type": "Application/Json", Authorization: `Bearer ${token}` } })
             .then(response => {
-                setEducation(response.data);
+                const formattedEd = response.data.map(ed => ({
+                    ...ed,
+                    start_date: convertTimestampToDate(ed.start_date), // Convert start_date
+                    end_date: convertTimestampToDate(ed.end_date), // Convert end_date
+                }));
+                setEducation(formattedEd);
             })
             .catch(error => {
                 console.error("There was an error fetching the education!", error);
@@ -198,8 +219,14 @@ const ProfilePage = () => {
     const getEx = async () => {
         axios.get(`http://localhost:8080/user/getExperiences/${user.id}`, { headers: { "Content-Type": "Application/Json", Authorization: `Bearer ${token}` } })
             .then(response => {
-                setExperiences(response.data);
-                console.log('experiences:'+response.data)
+
+                const formattedExperiences = response.data.map(exp => ({
+                    ...exp,
+                    start_date: convertTimestampToDate(exp.start_date), // Convert start_date
+                    end_date: convertTimestampToDate(exp.end_date), // Convert end_date
+                }));
+                setExperiences(formattedExperiences);
+                console.log('experiences:',formattedExperiences)
             })
             .catch(error => {
                 console.error("There was an error fetching the experiences!", error);
@@ -272,72 +299,6 @@ const ProfilePage = () => {
         }
     };
 
-
-    const handleCommentChange = (index, event) => {
-        const { value } = event.target;
-        setNewComments(prevState => ({
-            ...prevState,
-            [index]: value
-        }));
-
-    };
-
-    const submitComment = async (index) => {
-        const post = posts[index]; // Access the specific post using the index
-
-        console.log(post)
-        if (!post) {
-            console.error("Invalid post or postId");
-            return;
-        }
-        const post_id = post.postId;
-        console.log("postId submit comment:"+post_id)
-        //console.log(newComments[index])
-        const content = newComments[index];
-        console.log(content)
-        if (!content || content.trim() === '') {
-            console.log("Comment is empty.");
-            return;
-        }
-        const token = localStorage.getItem('auth_token');
-        const headers = {
-            'Content-type': 'application/json',
-            'Authorization': `Bearer ${token}`
-        }
-        const body = {
-            token : token,
-            content : content,
-            post_id : post_id.toString() // Assuming each post has an 'id' field
-        };
-
-        const url = 'http://localhost:8080/user/addComment'; // Update this URL to your server's URL for posting comments
-
-        try {
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: headers,
-                body: JSON.stringify(body)
-            });
-
-            if (response.ok) {
-                const data = await response;
-                console.log("Comment submitted:", data);
-                // Optionally update UI or state here
-                setNewComments(prevState => ({
-                    ...prevState,
-                    [post_id]: '' // Clear input field after successful submission
-                }));
-                // Refresh comments or manage state updates as needed
-            } else {
-                throw new Error('Failed to submit comment');
-            }
-        } catch (error) {
-            console.error("Error submitting comment:", error);
-        }
-
-        getPosts();
-    };
-
     const handleSaveExperience = () => {
         console.log(currentExp.experience_id)
         if (currentExp.experience_id) {
@@ -380,14 +341,14 @@ const ProfilePage = () => {
                             setShowExpModal(false);
                         })
                         .catch(error => console.error(error));
-
-
-
         }
     };
 
 
     const handleSaveEducation = () => {
+        console.log('start date', currentEdu.start_date)
+
+        console.log('end date', currentEdu.end_date)
         if (currentEdu.education_id) {
             // If education_id exists, it means we are updating an existing education
             const index = education.findIndex(edu => edu.education_id === currentEdu.education_id);
@@ -567,9 +528,7 @@ const ProfilePage = () => {
 
     const renderFriendCard = (friend) => (
             <>
-
                 <UserCard user={friend} />
-
             </>
     );
 
@@ -610,15 +569,6 @@ const ProfilePage = () => {
                                 </>
                             }
 
-                            {/*{*/}
-                            {/*    user_id !== id &&*/}
-
-                            {/*    <>*/}
-                            {/*        <Button variant="success" onClick={toggleChatBox} style={{marginLeft: '10px'}}>*/}
-                            {/*            Chat*/}
-                            {/*        </Button>*/}
-                            {/*    </>*/}
-                            {/*}*/}
 
                             <Card.Title style={{marginLeft: "15px"}}>
                                 {user.firstname + " " + user.lastname}
@@ -693,21 +643,24 @@ const ProfilePage = () => {
                                 <Button onClick={() => handleShowExpModal()}>Add Experience</Button>
                             }
                             {experiences.length > 0 ? experiences.map(exp => (
+
                                 <div key={exp.experience_id}>
                                     <h5>{exp.title}
-                                        {user_id===id &&
+                                        {user_id === id &&
 
                                             <>
-                                                <FontAwesomeIcon icon={faPencilAlt} className="ml-2" style={{cursor: 'pointer'}}
+                                                <FontAwesomeIcon icon={faPencilAlt} className="ml-2"
+                                                                 style={{cursor: 'pointer'}}
                                                                  onClick={() => handleShowExpModal(exp)}/>
-                                                <FontAwesomeIcon icon={faTrash} className="ml-2" style={{cursor: 'pointer'}}
+                                                <FontAwesomeIcon icon={faTrash} className="ml-2"
+                                                                 style={{cursor: 'pointer'}}
                                                                  onClick={() => handleDeleteExperience(exp.experience_id)}/>
                                             </>
                                         }
                                     </h5>
                                     <p>{exp.company_name}</p>
                                     <p>{exp.location}</p>
-                                    <p>{new Date(exp.start_date).toLocaleDateString()} - {new Date(exp.end_date).toLocaleDateString()}</p>
+                                    <p>{new Date(exp.start_date).toLocaleDateString()} - {exp.end_date !== "" ? (new Date(exp.end_date).toLocaleDateString()) : ("now")}</p>
                                     <hr/>
                                 </div>
                             )) : (<div><h5>No experiences added.</h5></div>)}
@@ -727,18 +680,20 @@ const ProfilePage = () => {
                                 <div key={edu.education_id}>
                                     <h5>
                                         {edu.degree} in {edu.field_of_study}
-                                        {user_id===id &&
+                                        {user_id === id &&
                                             <>
-                                                <FontAwesomeIcon icon={faPencilAlt} className="ml-2" style={{cursor: 'pointer'}}
+                                                <FontAwesomeIcon icon={faPencilAlt} className="ml-2"
+                                                                 style={{cursor: 'pointer'}}
                                                                  onClick={() => handleShowEduModal(edu)}/>
-                                                <FontAwesomeIcon icon={faTrash} className="ml-2" style={{cursor: 'pointer'}}
+                                                <FontAwesomeIcon icon={faTrash} className="ml-2"
+                                                                 style={{cursor: 'pointer'}}
                                                                  onClick={() => handleDeleteEducation(edu.education_id)}/>
                                             </>
                                         }
 
                                     </h5>
                                     <p>{edu.school_name}</p>
-                                    <p>{new Date(edu.start_date).toLocaleDateString()} - {new Date(edu.end_date).toLocaleDateString()}</p>
+                                    <p>{new Date(edu.start_date).toLocaleDateString()} - {edu.end_date !== "" ? (new Date(edu.end_date).toLocaleDateString()) : ("now")}</p>
                                     <hr/>
                                 </div>
                             )) : (<div><h5>No education added.</h5></div>)}
@@ -844,7 +799,7 @@ const ProfilePage = () => {
                             <Form.Control type="text" placeholder="Enter location" value={currentExp.location || ''}
                                           onChange={e => setCurrentExp({...currentExp, location: e.target.value})}/>
                         </Form.Group>
-                        <Form.Group controlId="formExperienceStartDate">
+                        <Form.Group controlId="formExperienceStartDate" >
                             <Form.Label>Start Date</Form.Label>
                             <Form.Control type="date" placeholder="Enter start date" value={currentExp.start_date || ''}
                                           onChange={e => setCurrentExp({...currentExp, start_date: e.target.value})}/>
@@ -898,6 +853,8 @@ const ProfilePage = () => {
                             <Form.Control type="date" placeholder="Enter end date" value={currentEdu.end_date || ''}
                                           onChange={e => setCurrentEdu({...currentEdu, end_date: e.target.value})}/>
                         </Form.Group>
+
+
                     </Form>
                 </Modal.Body>
                 <Modal.Footer>

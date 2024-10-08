@@ -349,18 +349,18 @@ const CompanyProfilePage = () => {
 
             <Modal show={showMissionModal} onHide={handleCloseMissionModal}>
                 <Modal.Header closeButton>
-                    <Modal.Title>Edit About Me</Modal.Title>
+                    <Modal.Title>Edit Mission</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <Form>
                         <Form.Group controlId="formAboutMe">
-                            <Form.Label>About Me</Form.Label>
+                            <Form.Label>Mission</Form.Label>
                             <Form.Control
                                 as="textarea"
                                 rows={5}
                                 value={mission}
                                 onChange={handleMissionChange}
-                                placeholder="Enter about me content"
+                                placeholder="Enter mission"
                             />
                         </Form.Group>
                     </Form>
