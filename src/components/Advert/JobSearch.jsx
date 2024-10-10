@@ -6,6 +6,7 @@ import {useNavigate} from "react-router-dom";
 const JobSearchPage = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState([]);
+    
     const token=localStorage.getItem('auth_token')
     const navigate = useNavigate();
     const handleSearch = async (event) => {
@@ -21,19 +22,6 @@ const JobSearchPage = () => {
             console.error("There was an error searching!", error);
         }
     };
-
-    // const getCompanyOfAdvert = async(advertId) =>
-    // {
-    //     try {
-    //         const response = await axios.get(`http://localhost:8080/user/getCompanyOfAdvert/${advertId}`, {
-    //             headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }
-    //         });
-    //         return response.data;
-    //         //console.log(response.data);
-    //     } catch (error) {
-    //         console.error("There was an error getting the company of advert!", error);
-    //     }
-    // };
 
     const toJobPage = async(advertId) =>{
         try {

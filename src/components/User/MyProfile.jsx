@@ -3,7 +3,16 @@ import {Container, Row, Col, Image, Card, Button, Modal, Form, ButtonGroup} from
 import {json, useNavigate, useParams} from 'react-router-dom';
 import axios from 'axios';
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faComment, faShare, faThumbsUp, faPencilAlt, faTrash, faPlusCircle,faUserMinus} from "@fortawesome/free-solid-svg-icons";
+import {
+    faComment,
+    faShare,
+    faThumbsUp,
+    faPencilAlt,
+    faTrash,
+    faPlusCircle,
+    faUserMinus,
+    faPlus
+} from "@fortawesome/free-solid-svg-icons";
 import ChatBox from "../Messages/ChatBox";
 import UserImage from "../Images/UserImage";
 import Post from "../Posts/Post";
@@ -38,6 +47,9 @@ const ProfilePage = () => {
     const [showType,setShowType]=useState('Posts');
     const [friends,setFriends]=useState([]);
     const [followings,setFollowings]=useState([]);
+    const [showSkillModal, setShowSkillModal] = useState(false);  // To toggle the skill modal visibility
+    const [newSkill, setNewSkill] = useState('');  // To store the new skill input value
+
 
 
     useEffect(() => {
@@ -125,6 +137,57 @@ const ProfilePage = () => {
         }
     }, [user, token]);
 
+
+
+    const handleAddSkill = () => {
+        if(newSkill.trim()==='') {
+            alert('Can\'t take an empty value');
+            return;
+        }
+
+        axios.post(
+            `http://localhost:8080/user/addSkill/${profile.profile_id}`,
+            {"skill_name":newSkill.trim()}, // The data to be sent in the request body
+            {
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${localStorage.getItem('auth_token')}`
+                }
+            }
+        )
+            .then(response => {
+                setProfile(response.data);
+                setNewSkill('');
+                setShowSkillModal(false);
+                //setShowExpModal(false);
+            })
+            .catch(error => {
+                console.error(error);
+                alert('Skill is already added.');
+            });
+
+
+    };
+
+    const deleteSkill = (skill_id) =>{
+        axios.delete(
+            `http://localhost:8080/user/deleteSkill/${skill_id}`,
+             // The data to be sent in the request body
+            {
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${localStorage.getItem('auth_token')}`
+                }
+            }
+        )
+            .then(response => {
+                setProfile(response.data);
+                setNewSkill('');
+                setShowSkillModal(false);
+                //setShowExpModal(false);
+            })
+            .catch(error => console.error(error));
+    };
 
     const convertTimestampToDate = (timestamp) => {
         if (!timestamp) return ''; // Return an empty string if timestamp is not set
@@ -632,8 +695,76 @@ const ProfilePage = () => {
                         </Card.Body>
                     </Card>
                 </Col>
-
             </Row>
+
+            <hr/>
+
+            <Row className="mt-4 d-flex flex-wrap align-items-stretch">
+                <h4><strong style={{marginBottom:'40px'}}>Skills</strong></h4>
+                {profile.skills.length>0 ? (profile.skills.map((skill) => (
+                    <Col key={skill.skill_id} xs="auto" className="mb-3 d-flex" style={{marginRight: '10px'}}>
+                        <Card
+                            style={{
+                                backgroundColor: '#f8f9fa',
+                                border: '3px solid #ddd',
+                                height: '120px',  // Fixed height
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                flexGrow: 1,     // Allow card to grow based on content
+                                padding: '10px',
+                                minWidth: '100px' // Minimum width for better appearance
+                            }}
+                        >
+                            <Card.Body className="d-flex align-items-center justify-content-center">
+                                <Card.Text className="text-center mb-0">
+                                    {skill.skill_name}
+                                    {user_id === id && (
+                                        <FontAwesomeIcon
+                                            icon={faTrash}
+                                            className="ml-2"
+                                            style={{cursor: 'pointer', marginLeft: '20px'}}
+                                            onClick={() => deleteSkill(skill.skill_id)}
+                                        />
+                                    )}
+                                </Card.Text>
+                            </Card.Body>
+                        </Card>
+                    </Col>
+                ))):(
+                    <>
+                        <h6 style={{marginBottom:'20px',marginTop:'20px'}}>Skills are empty. Add new skills from the "Add Skill" button.</h6>
+                    </>
+                )}
+
+                {user_id === id && (
+                    <Col xs="auto" className="mb-3 d-flex" style={{marginRight: '10px'}} >
+                        <Card
+                            style={{
+                                backgroundColor: '#f8f9fa',
+                                border: '3px solid #ddd',
+                                height: '120px',  // Fixed height
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                cursor: 'pointer',
+                                flexGrow: 1,     // Allow card to grow based on content
+                                padding: '10px',
+                                minWidth: '100px' // Minimum width for better appearance
+                            }}
+                            onClick={() => setShowSkillModal(true)}
+                        >
+                            <Card.Body>
+                                <FontAwesomeIcon icon={faPlus} size="2x" className="text-muted"/>
+                                <Card.Text className="text-center mt-2">Add Skill</Card.Text>
+                            </Card.Body>
+                        </Card>
+                    </Col>
+                )}
+            </Row>
+
+            <hr/>
+
             <Row className="mt-4">
                 <Col xs={12}>
                     <Card>
@@ -703,7 +834,7 @@ const ProfilePage = () => {
             </Row>
 
 
-            <ButtonGroup className="mb-3" style={{marginTop:'20px'}}>
+            <ButtonGroup className="mb-3" style={{marginTop: '20px'}}>
                 <Button
                     className="custom-button"
                     variant={showType === 'Posts' ? "primary" : "outline-primary"}
@@ -728,7 +859,7 @@ const ProfilePage = () => {
             </ButtonGroup>
             <hr/>
 
-            {showType==='Posts'&&(
+            {showType === 'Posts' && (
 
                 <>
                     {user_id === id &&
@@ -744,7 +875,7 @@ const ProfilePage = () => {
                 </>
 
             )}
-            {showType==='Friends'&&(
+            {showType === 'Friends' && (
                 <>
                     {friends.map(friend => renderFriendCard(friend))}
                     <br/>
@@ -799,7 +930,7 @@ const ProfilePage = () => {
                             <Form.Control type="text" placeholder="Enter location" value={currentExp.location || ''}
                                           onChange={e => setCurrentExp({...currentExp, location: e.target.value})}/>
                         </Form.Group>
-                        <Form.Group controlId="formExperienceStartDate" >
+                        <Form.Group controlId="formExperienceStartDate">
                             <Form.Label>Start Date</Form.Label>
                             <Form.Control type="date" placeholder="Enter start date" value={currentExp.start_date || ''}
                                           onChange={e => setCurrentExp({...currentExp, start_date: e.target.value})}/>
@@ -909,6 +1040,31 @@ const ProfilePage = () => {
                 <Modal.Footer>
                     <Button variant="secondary" onClick={handleCloseModal}>Close</Button>
                     <Button variant="primary" onClick={handlePostSubmit}>Add post</Button>
+                </Modal.Footer>
+            </Modal>
+
+
+            {/* Skill Modal */}
+            <Modal show={showSkillModal} onHide={() => setShowSkillModal(false)}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Add a New Skill</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form>
+                        <Form.Group controlId="formSkill">
+                            <Form.Label>Skill Name</Form.Label>
+                            <Form.Control type="text" placeholder="Enter a skill" value={newSkill}
+                                          onChange={(e) => setNewSkill(e.target.value)}/>
+                        </Form.Group>
+                    </Form>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setShowSkillModal(false)}>
+                        Close
+                    </Button>
+                    <Button variant="primary" onClick={handleAddSkill}>
+                        Add Skill
+                    </Button>
                 </Modal.Footer>
             </Modal>
 
