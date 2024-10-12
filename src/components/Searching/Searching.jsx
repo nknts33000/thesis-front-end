@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import { Container, Form, Button, Card, ButtonGroup, Image } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -12,6 +12,12 @@ const SearchPage = () => {
     const [searchType, setSearchType] = useState('users'); // Default search type
     const token = localStorage.getItem('auth_token');
     const navigate = useNavigate();
+    const [recommendedUsers,setRecommendedUsers]=useState([]);
+    const user_id=localStorage.getItem('user_id');
+
+    useEffect(() => {
+        getRecommendedUsers();
+    }, [user_id]);
 
     const handleSearch = async (event) => {
         event.preventDefault(); // Prevent the default form submission
@@ -38,6 +44,18 @@ const SearchPage = () => {
     const handleCardClick = (result) => {
         if(searchType === 'users') navigate(`/user/${result.id}`);
         else navigate(`/company/${result.companyId}`);
+    };
+
+    const getRecommendedUsers = async () =>{
+        await axios.get(`http://localhost:8080/user/getRecommendedUsers/${user_id}`, {
+            headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }
+        }).then(
+            (response)=>{
+                setRecommendedUsers(response.data);
+            }
+        ).catch((error)=>{
+            console.log(error);
+        });
     };
 
     return (
@@ -79,7 +97,35 @@ const SearchPage = () => {
                 </Button>
             </Form>
 
-            <hr />
+            {searchType==='users'&&
+
+                <>
+                    <hr/>
+                    <div className="row">
+                        {recommendedUsers.length > 0 ? (
+                            recommendedUsers.map((result, index) => (
+                                <div key={index} className="col-md-4 mb-4" onClick={() => handleCardClick(result)}>
+                                    <Card className="search-card">
+                                        <div className="card-image-container"></div>
+                                        <Card.Body style={{cursor: 'pointer'}}>
+                                            <Card.Title>
+                                                <UserImage id={result.id} size={'40px'}/>
+                                                {result.firstname} {result.lastname}
+                                            </Card.Title>
+                                            <Card.Subtitle
+                                                className="mb-2 text-muted">{result.email}</Card.Subtitle>
+                                            <Card.Text>Location: {result.location}</Card.Text>
+                                        </Card.Body>
+                                    </Card>
+                                </div>
+                            ))
+                        ) : (
+                            <h6>No recommended users found. Be sure to fill your profile with information so we can find you users with similar interests.</h6>
+                        )}
+                    </div>
+                </>
+            }
+            <hr/>
 
             <h2>Search Results</h2>
             <div className="row">
@@ -88,11 +134,11 @@ const SearchPage = () => {
                         <div key={index} className="col-md-4 mb-4" onClick={() => handleCardClick(result)}>
                             <Card className="search-card">
                                 <div className="card-image-container"></div>
-                                <Card.Body style={{ cursor: 'pointer' }}>
+                                <Card.Body style={{cursor: 'pointer'}}>
                                     {searchType === 'users' ? (
                                         <>
                                             <Card.Title>
-                                                <UserImage id={result.id} size={'40px'} />
+                                                <UserImage id={result.id} size={'40px'}/>
                                                 {result.firstname} {result.lastname}
                                             </Card.Title>
                                             <Card.Subtitle className="mb-2 text-muted">{result.email}</Card.Subtitle>
@@ -100,7 +146,7 @@ const SearchPage = () => {
                                         </>
                                     ) : (
                                         <>
-                                            <CompanyImage companyId={result.companyId} size={'40px'} />
+                                            <CompanyImage companyId={result.companyId} size={'40px'}/>
                                             <Card.Title>{result.name}</Card.Title>
                                             <Card.Text>{result.mission}</Card.Text>
                                         </>
