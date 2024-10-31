@@ -733,7 +733,7 @@ const ProfilePage = () => {
                     </Col>
                 ))):(
                     <>
-                        <h6 style={{marginBottom:'20px',marginTop:'20px'}}>Skills are empty. Add new skills from the "Add Skill" button.</h6>
+                        <h6 style={{marginBottom:'20px',marginTop:'20px'}}>Skills are empty.</h6>
                     </>
                 )}
 
@@ -906,7 +906,7 @@ const ProfilePage = () => {
 
 
             {/* ChatBox Component */}
-            <ChatBox show={isChatOpen} handleClose={toggleChatBox} id={id} user_id={user_id}/>
+            <ChatBox show={isChatOpen} handleClose={toggleChatBox} user_id={user_id} id={id}/>
 
 
             <Modal show={showExpModal} onHide={() => setShowExpModal(false)}>

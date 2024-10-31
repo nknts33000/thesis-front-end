@@ -101,6 +101,7 @@ const SearchPage = () => {
 
                 <>
                     <hr/>
+                    <h2>Recommended Users</h2>
                     <div className="row">
                         {recommendedUsers.length > 0 ? (
                             recommendedUsers.map((result, index) => (
@@ -120,7 +121,8 @@ const SearchPage = () => {
                                 </div>
                             ))
                         ) : (
-                            <h6>No recommended users found. Be sure to fill your profile with information so we can find you users with similar interests.</h6>
+                            <h6>No recommended users found. Be sure to fill your profile with information so we can find
+                                you users with similar interests.</h6>
                         )}
                     </div>
                 </>

@@ -10,17 +10,6 @@ const SettingsPage = () => {
     const [location, setLocation] = useState('');
     const [repeatPassword,setRepeatPassword]=useState('');
     const user_id=localStorage.getItem('user_id');
-    const [notifications, setNotifications] = useState({
-        email: true,
-        push: true,
-        sms: false,
-    });
-    const [privacy, setPrivacy] = useState({
-        profileVisibility: 'public',
-        connectionRequests: 'everyone',
-        activityStatus: true,
-        messageSettings: 'everyone',
-    });
 
     const handlePut = (url,settingName,body) =>{
         // const res=
@@ -227,82 +216,8 @@ const SettingsPage = () => {
                                     contain at least one small letter, one capital letter, one number and one special
                                     character.</h5>
                             </Tab.Pane>
-                            {/*<Tab.Pane eventKey="privacy">*/}
-                            {/*    <h4>Privacy Settings</h4>*/}
-                            {/*    <Form>*/}
-                            {/*        <Form.Group controlId="formProfileVisibility">*/}
-                            {/*            <Form.Label>Profile Visibility</Form.Label>*/}
-                            {/*            <Form.Control*/}
-                            {/*                as="select"*/}
-                            {/*                value={privacy.profileVisibility}*/}
-                            {/*                onChange={(e) => setPrivacy({*/}
-                            {/*                    ...privacy,*/}
-                            {/*                    profileVisibility: e.target.value*/}
-                            {/*                })}*/}
-                            {/*            >*/}
-                            {/*                <option value="public">Public</option>*/}
-                            {/*                <option value="connections">Connections Only</option>*/}
-                            {/*                <option value="private">Private</option>*/}
-                            {/*            </Form.Control>*/}
-                            {/*        </Form.Group>*/}
-                            {/*        <Form.Group controlId="formConnectionRequests">*/}
-                            {/*            <Form.Label>Connection Requests</Form.Label>*/}
-                            {/*            <Form.Control*/}
-                            {/*                as="select"*/}
-                            {/*                value={privacy.connectionRequests}*/}
-                            {/*                onChange={(e) => setPrivacy({*/}
-                            {/*                    ...privacy,*/}
-                            {/*                    connectionRequests: e.target.value*/}
-                            {/*                })}*/}
-                            {/*            >*/}
-                            {/*                <option value="everyone">Everyone</option>*/}
-                            {/*                <option value="friendsOfFriends">Friends of Friends</option>*/}
-                            {/*                <option value="noOne">No One</option>*/}
-                            {/*            </Form.Control>*/}
-                            {/*        </Form.Group>*/}
-                            {/*        <Form.Group controlId="formActivityStatus">*/}
-                            {/*            <Form.Check*/}
-                            {/*                type="checkbox"*/}
-                            {/*                label="Show Activity Status"*/}
-                            {/*                checked={privacy.activityStatus}*/}
-                            {/*                onChange={(e) => setPrivacy({...privacy, activityStatus: e.target.checked})}*/}
-                            {/*            />*/}
-                            {/*        </Form.Group>*/}
-                            {/*        <Form.Group controlId="formMessageSettings">*/}
-                            {/*            <Form.Label>Message Settings</Form.Label>*/}
-                            {/*            <Form.Control*/}
-                            {/*                as="select"*/}
-                            {/*                value={privacy.messageSettings}*/}
-                            {/*                onChange={(e) => setPrivacy({...privacy, messageSettings: e.target.value})}*/}
-                            {/*            >*/}
-                            {/*                <option value="everyone">Everyone</option>*/}
-                            {/*                <option value="connections">Connections Only</option>*/}
-                            {/*                <option value="noOne">No One</option>*/}
-                            {/*            </Form.Control>*/}
-                            {/*        </Form.Group>*/}
-                            {/*        <Button variant="primary" onClick={() => handleSave('privacy')}>*/}
-                            {/*            Save*/}
-                            {/*        </Button>*/}
-                            {/*    </Form>*/}
-                            {/*</Tab.Pane>*/}
-                            {/*<Tab.Pane eventKey="account">*/}
-                            {/*    <h4>Account Settings</h4>*/}
-                            {/*    <Button variant="danger" onClick={() => alert('Delete Account')}>*/}
-                            {/*        Delete Account*/}
-                            {/*    </Button>*/}
-                            {/*    <Button variant="secondary" onClick={() => alert('Deactivate Account')}*/}
-                            {/*            className="ml-2">*/}
-                            {/*        Deactivate Account*/}
-                            {/*    </Button>*/}
-                            {/*</Tab.Pane>*/}
 
                         </Tab.Content>
-                        {/*<br/>*/}
-                        {/*<br/>*/}
-                        {/*<br/>*/}
-                        {/*<h5 style={{marginTop: '10px'}}>The password should have a length of at least 8 characters and*/}
-                        {/*    contain at least one small letter, one capital letter, one number and one special*/}
-                        {/*    character.</h5>*/}
 
                     </Col>
                 </Row>

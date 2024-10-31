@@ -68,15 +68,6 @@ function Main() {
 
     const showMessageModal = () => {
 
-        // axios.get(`http://localhost:8080/user/getConvos/${user_id}`,{ headers: { "Content-Type": "Application/Json", Authorization: `Bearer ${token}` } })
-        //             .then(response => {
-        //                 console.log('convos:');console.log(response.data);
-        //                 setConversations(response.data);
-        //             })
-        //             .catch(error => {
-        //                 console.error("There was an error fetching the experiences!", error);
-        //             });
-
         setMessageModal(true);
     };
     const closeMessageModal = () => {

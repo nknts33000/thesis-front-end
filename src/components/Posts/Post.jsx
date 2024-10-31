@@ -76,29 +76,23 @@ const Post = ({ initialPostDtos, fetchPosts }) => {
 
     const submitComment = async (index) => {
         const post = postDtos[index].post; // Access the specific post using the index
-
         if (!post) {
             console.error("Invalid post or postId");
             return;
         }
-
         const post_id = post.postId;
         const content = newComments[index]; // Get the comment content from state
-
         if (!content || content.trim() === '') {
             console.log("Comment is empty.");
             return;
         }
-
         const token = localStorage.getItem('auth_token');
         const headers = {
             'Content-type': 'application/json',
             'Authorization': `Bearer ${token}`
         };
         const body = { content: content };
-
         const url = `http://localhost:8080/user/addComment/${post_id}/${user_id}`; // Update this URL to your server's URL for posting comments
-
         try {
             await axios.post(url, JSON.stringify(body), { headers });
             setNewComments((prevState) => ({
@@ -106,7 +100,6 @@ const Post = ({ initialPostDtos, fetchPosts }) => {
                 [index]: '' // Clear input field after successful submission
             }));
             // Refresh comments or manage state updates as needed
-
             try {
                 const response = await axios.get(`http://localhost:8080/user/getCommentsOfPost/${post_id}`, { headers });
                 const updatedComments = response.data;
@@ -119,11 +112,9 @@ const Post = ({ initialPostDtos, fetchPosts }) => {
             } catch (e) {
                 console.log('Failed to fetch post\'s comments:', e);
             }
-
         } catch (error) {
             console.error("Error submitting comment:", error);
         }
-
     };
 
     const toUserProf = (id) => {
